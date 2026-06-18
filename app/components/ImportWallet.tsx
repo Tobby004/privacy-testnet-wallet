@@ -6,11 +6,16 @@ import { PrivacyWallet } from "@/lib/hdWallet";
 
 type Mode = "menu" | "import" | "generate";
 
+type ImportWalletProps = {
+  onSuccess: (wallet: PrivacyWallet) => void;
+  selectedNetwork: "sepolia" | "goerli";
+  onNetworkChange: (network: "sepolia" | "goerli") => void;
+};
 export function ImportWallet({
   onSuccess,
-}: {
-  onSuccess: (wallet: PrivacyWallet) => void;
-}) {
+  selectedNetwork,
+  onNetworkChange,
+}: ImportWalletProps) {
   const [mode, setMode] = useState<Mode>("menu");
   const [mnemonic, setMnemonic] = useState("");
   const [password, setPassword] = useState("");
