@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/storage.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781684617991,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781684617991,
+            "name": "Commit-0",
+            "content": "import { NETWORKS, NetworkId } from \"./networks\";\n\nexport interface SavedAddress {\n  address: string;\n  label: string;\n  network: NetworkId;\n  index: number;\n  createdAt: number;\n}\n\nexport interface Transaction {\n  id: string;\n  from: string;\n  to: string;\n  value: string; // in ETH\n  txHash: string;\n  network: NetworkId;\n  timestamp: number;\n  status: \"pending\" | \"confirmed\" | \"failed\";\n}\n\n// Store metadata about addresses (labels, networks)\nexport function saveAddressLabel(\n  address: string,\n  label: string,\n  network: NetworkId,\n  index: number\n) {\n  const key = `address_${address}_${network}`;\n  localStorage.setItem(\n    key,\n    JSON.stringify({\n      address,\n      label,\n      network,\n      index,\n      createdAt: Date.now(),\n    })\n  );\n}\n\nexport function getAddressLabel(\n  address: string,\n  network: NetworkId\n): string | null {\n  const key = `address_${address}_${network}`;\n  const data = localStorage.getItem(key);\n  return data ? JSON.parse(data).label : null;\n}\n\n// Store transaction history\nexport function addTransaction(tx: Transaction) {\n  const txs = getAllTransactions();\n  txs.push(tx);\n  localStorage.setItem(\"transactions\", JSON.stringify(txs));\n}\n\nexport function getAllTransactions(): Transaction[] {\n  const data = localStorage.getItem(\"transactions\");\n  return data ? JSON.parse(data) : [];\n}\n\nexport function getTransactionsByNetwork(network: NetworkId): Transaction[] {\n  return getAllTransactions().filter((tx) => tx.network === network);\n}"
+        }
+    ]
+}

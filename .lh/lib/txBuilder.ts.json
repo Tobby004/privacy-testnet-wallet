@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/txBuilder.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781591610108,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781591610108,
+            "name": "Commit-0",
+            "content": "import { ethers } from \"ethers\";\n\nexport interface PrivateTransaction {\n  to: string;\n  value: string;\n  data?: string;\n  gasLimit?: string;\n  nonce: number;\n  chainId: number;\n}\n\nexport function buildTransaction(\n  from: string,\n  to: string,\n  valueEth: string,\n  nonce: number,\n  chainId: number,\n  gasLimit: string = \"21000\",\n  gasPrice: string = ethers.parseUnits(\"1\", \"gwei\").toString()\n): PrivateTransaction {\n  const valueWei = ethers.parseEther(valueEth).toString();\n\n  return {\n    to,\n    value: valueWei,\n    nonce,\n    chainId,\n    gasLimit,\n    data: \"0x\",\n  };\n}\n\nexport async function estimateGasPrivate(\n  tx: PrivateTransaction\n): Promise<string> {\n  const response = await fetch(\"/api/gas-estimate\", {\n    method: \"POST\",\n    headers: { \"Content-Type\": \"application/json\" },\n    body: JSON.stringify(tx),\n  });\n\n  if (!response.ok) throw new Error(\"Gas estimation failed\");\n  const { gasLimit } = await response.json();\n  return gasLimit;\n}\n\nexport function prepareTxForSigning(\n  tx: PrivateTransaction,\n  gasPrice: string\n): ethers.TransactionRequest {\n  return {\n    to: tx.to,\n    value: tx.value,\n    data: tx.data || \"0x\",\n    nonce: tx.nonce,\n    gasLimit: tx.gasLimit,\n    gasPrice,\n    chainId: tx.chainId,\n  };\n}"
+        }
+    ]
+}

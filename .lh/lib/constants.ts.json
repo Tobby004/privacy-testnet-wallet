@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/constants.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781591637301,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781591637301,
+            "name": "Commit-0",
+            "content": "export const RPC_ENDPOINTS = [\n  \"https://sepolia.drpc.org\",\n  \"https://rpc.sepolia.org\",\n  \"https://ethereum-sepolia-rpc.publicnode.com\",\n];\n\nexport const NETWORKS = {\n  sepolia: {\n    chainId: 11155111,\n    name: \"Sepolia Testnet\",\n    rpcUrl: RPC_ENDPOINTS[0],\n  },\n};\n\nexport const MEV_BLOCKER_RPC = \"https://api.mevblocker.io/tx\";"
+        }
+    ]
+}

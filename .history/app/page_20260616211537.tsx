@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { PrivacyWallet } from "@/lib/hdWallet";
 import { decryptMnemonic } from "@/lib/encryption";
-import { NetworkId } from "@/lib/networks";
 import { ImportWallet } from "./components/ImportWallet";
 import { Dashboard } from "./components/Dashboard";
 
@@ -12,19 +11,15 @@ type View = "import" | "dashboard" | "unlock";
 export default function Home() {
   const [view, setView] = useState<View>("import");
   const [wallet, setWallet] = useState<PrivacyWallet | null>(null);
-  const [network, setNetwork] = useState<NetworkId>("sepolia");
   const [loading, setLoading] = useState(true);
   const [passwordAttempt, setPasswordAttempt] = useState("");
   const [unlockError, setUnlockError] = useState("");
 
-  // Initialize on mount
+  // On mount, check if wallet exists in localStorage
   useEffect(() => {
     const encrypted = localStorage.getItem("encrypted_wallet");
-    const savedNetwork = (localStorage.getItem("selected_network") as NetworkId) || "sepolia";
-    
-    setNetwork(savedNetwork);
-    
     if (encrypted) {
+      // Wallet exists, ask for password to unlock
       setView("unlock");
     }
     setLoading(false);
@@ -32,13 +27,7 @@ export default function Home() {
 
   const handleImportSuccess = (newWallet: PrivacyWallet) => {
     setWallet(newWallet);
-    localStorage.setItem("selected_network", network);
     setView("dashboard");
-  };
-
-  const handleNetworkChange = (newNetwork: NetworkId) => {
-    setNetwork(newNetwork);
-    localStorage.setItem("selected_network", newNetwork);
   };
 
   const handleUnlock = async (e: React.FormEvent) => {
@@ -47,15 +36,12 @@ export default function Home() {
 
     try {
       const encrypted = localStorage.getItem("encrypted_wallet");
-      const savedNetwork = (localStorage.getItem("selected_network") as NetworkId) || "sepolia";
-      
       if (!encrypted) throw new Error("No wallet found");
 
       const mnemonic = decryptMnemonic(encrypted, passwordAttempt);
       const unlockedWallet = new PrivacyWallet(mnemonic);
       
       setWallet(unlockedWallet);
-      setNetwork(savedNetwork);
       setPasswordAttempt("");
       setView("dashboard");
     } catch (err: any) {
@@ -73,9 +59,7 @@ export default function Home() {
     if (confirm("Are you sure? This will delete the encrypted wallet from this device.")) {
       localStorage.removeItem("encrypted_wallet");
       localStorage.removeItem("wallet_password_hint");
-      localStorage.removeItem("selected_network");
       setWallet(null);
-      setNetwork("sepolia");
       setView("import");
     }
   };
@@ -93,13 +77,7 @@ export default function Home() {
 
   return (
     <>
-      {view === "import" && (
-        <ImportWallet 
-          onSuccess={handleImportSuccess}
-          selectedNetwork={network}
-          onNetworkChange={handleNetworkChange}
-        />
-      )}
+      {view === "import" && <ImportWallet onSuccess={handleImportSuccess} />}
       
       {view === "unlock" && (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
@@ -109,9 +87,7 @@ export default function Home() {
                 <span className="text-3xl">🔐</span>
               </div>
               <h1 className="text-2xl font-bold text-slate-900">Unlock Wallet</h1>
-              <p className="text-sm text-slate-500 mt-2">
-                Network: <span className="font-semibold text-slate-700">{network}</span>
-              </p>
+              <p className="text-sm text-slate-500 mt-2">Enter your password to decrypt your keys</p>
             </div>
 
             <form onSubmit={handleUnlock} className="space-y-4">
@@ -163,12 +139,7 @@ export default function Home() {
       )}
 
       {view === "dashboard" && wallet && (
-        <Dashboard 
-          wallet={wallet} 
-          network={network}
-          onNetworkChange={handleNetworkChange}
-          onLock={handleLock} 
-        />
+        <Dashboard wallet={wallet} onLock={handleLock} />
       )}
     </>
   );

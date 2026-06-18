@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/encryption.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781591573758,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781591573758,
+            "name": "Commit-0",
+            "content": "import nacl from \"tweetnacl\";\nimport { secretbox, randomBytes } from \"tweetnacl\";\nimport * as util from \"tweetnacl-util\";\n\nexport function encryptMnemonic(\n  mnemonic: string,\n  password: string\n): string {\n  const passwordBytes = util.decodeUTF8(password);\n  const hash = new Uint8Array(32);\n  for (let i = 0; i < 32; i++) {\n    hash[i] = (passwordBytes[i % passwordBytes.length] || 0) ^ (i * 7);\n  }\n\n  const nonce = randomBytes(secretbox.nonceLength);\n  const messageBytes = util.decodeUTF8(mnemonic);\n  const encrypted = secretbox(messageBytes, nonce, hash);\n\n  if (!encrypted) throw new Error(\"Encryption failed\");\n\n  const combined = new Uint8Array(nonce.length + encrypted.length);\n  combined.set(nonce);\n  combined.set(encrypted, nonce.length);\n\n  return util.encodeBase64(combined);\n}\n\nexport function decryptMnemonic(\n  encrypted: string,\n  password: string\n): string {\n  const passwordBytes = util.decodeUTF8(password);\n  const hash = new Uint8Array(32);\n  for (let i = 0; i < 32; i++) {\n    hash[i] = (passwordBytes[i % passwordBytes.length] || 0) ^ (i * 7);\n  }\n\n  const combined = util.decodeBase64(encrypted);\n  const nonce = combined.slice(0, secretbox.nonceLength);\n  const ciphertext = combined.slice(secretbox.nonceLength);\n\n  const decrypted = secretbox.open(ciphertext, nonce, hash);\n  if (!decrypted) throw new Error(\"Decryption failed\");\n\n  return util.encodeUTF8(decrypted);\n}"
+        }
+    ]
+}

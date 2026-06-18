@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/network.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781684592977,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781684592977,
+            "name": "Commit-0",
+            "content": "export const NETWORKS = {\n  sepolia: {\n    chainId: 11155111,\n    name: \"Sepolia\",\n    rpcUrls: [\n      \"https://sepolia.drpc.org\",\n      \"https://rpc.sepolia.org\",\n      \"https://ethereum-sepolia-rpc.publicnode.com\",\n    ],\n    explorerUrl: \"https://sepolia.etherscan.io\",\n    faucetUrl: \"https://www.sepoliafaucet.io\",\n    nativeCurrency: { name: \"ETH\", symbol: \"ETH\", decimals: 18 },\n  },\n  goerli: {\n    chainId: 5,\n    name: \"Goerli\",\n    rpcUrls: [\n      \"https://goerli.drpc.org\",\n      \"https://rpc.goerli.mudit.blog\",\n    ],\n    explorerUrl: \"https://goerli.etherscan.io\",\n    faucetUrl: \"https://goerlifaucet.com\",\n    nativeCurrency: { name: \"ETH\", symbol: \"ETH\", decimals: 18 },\n  },\n};\n\nexport type NetworkId = keyof typeof NETWORKS;\n\nexport function getNetwork(id: NetworkId) {\n  return NETWORKS[id];\n}"
+        }
+    ]
+}

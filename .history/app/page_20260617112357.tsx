@@ -17,14 +17,12 @@ export default function Home() {
   const [passwordAttempt, setPasswordAttempt] = useState("");
   const [unlockError, setUnlockError] = useState("");
 
-  // Initialize on mount
   useEffect(() => {
     const encrypted = localStorage.getItem("encrypted_wallet");
     const savedNetwork = (localStorage.getItem("selected_network") as NetworkId) || "sepolia";
     
-    setNetwork(savedNetwork);
-    
     if (encrypted) {
+      setNetwork(savedNetwork);
       setView("unlock");
     }
     setLoading(false);
@@ -69,17 +67,6 @@ export default function Home() {
     setView("unlock");
   };
 
-  const handleForgetWallet = () => {
-    if (confirm("Are you sure? This will delete the encrypted wallet from this device.")) {
-      localStorage.removeItem("encrypted_wallet");
-      localStorage.removeItem("wallet_password_hint");
-      localStorage.removeItem("selected_network");
-      setWallet(null);
-      setNetwork("sepolia");
-      setView("import");
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
@@ -109,9 +96,7 @@ export default function Home() {
                 <span className="text-3xl">🔐</span>
               </div>
               <h1 className="text-2xl font-bold text-slate-900">Unlock Wallet</h1>
-              <p className="text-sm text-slate-500 mt-2">
-                Network: <span className="font-semibold text-slate-700">{network}</span>
-              </p>
+              <p className="text-sm text-slate-500 mt-2">Network: <span className="font-semibold">{network}</span></p>
             </div>
 
             <form onSubmit={handleUnlock} className="space-y-4">
@@ -142,22 +127,6 @@ export default function Home() {
                 Unlock Wallet
               </button>
             </form>
-
-            <div className="mt-6 space-y-3">
-              <button
-                onClick={handleForgetWallet}
-                className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 font-semibold rounded-lg transition text-sm"
-              >
-                Forget This Wallet
-              </button>
-            </div>
-
-            <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs font-semibold text-blue-900">ℹ️ Wallet Detected</p>
-              <p className="text-xs text-blue-800 mt-1">
-                A wallet is saved on this device. Enter your password to unlock it.
-              </p>
-            </div>
           </div>
         </div>
       )}

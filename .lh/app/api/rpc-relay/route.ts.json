@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/api/rpc-relay/route.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781591738226,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781591738226,
+            "name": "Commit-0",
+            "content": "import { NextRequest, NextResponse } from \"next/server\";\nimport { RPC_ENDPOINTS } from \"@/lib/constants\";\n\nlet rpcIndex = 0;\n\nfunction getNextRPC(): string {\n  const rpc = RPC_ENDPOINTS[rpcIndex % RPC_ENDPOINTS.length];\n  rpcIndex++;\n  return rpc;\n}\n\nexport async function POST(request: NextRequest) {\n  try {\n    const body = await request.json();\n    const { method, params, id } = body;\n\n    if (!method) {\n      return NextResponse.json(\n        { error: \"Missing method\" },\n        { status: 400 }\n      );\n    }\n\n    const rpcUrl = getNextRPC();\n\n    const response = await fetch(rpcUrl, {\n      method: \"POST\",\n      headers: { \"Content-Type\": \"application/json\" },\n      body: JSON.stringify({\n        jsonrpc: \"2.0\",\n        method,\n        params,\n        id,\n      }),\n    });\n\n    const data = await response.json();\n    return NextResponse.json(data);\n  } catch (error) {\n    console.error(\"[RPC Error]\", error);\n    return NextResponse.json(\n      { error: \"RPC request failed\" },\n      { status: 500 }\n    );\n  }\n}"
+        }
+    ]
+}

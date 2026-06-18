@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/api/private-tx/route.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1781591694410,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1781591694410,
+            "name": "Commit-0",
+            "content": "import { NextRequest, NextResponse } from \"next/server\";\nimport { MEV_BLOCKER_RPC } from \"@/lib/constants\";\n\nexport async function POST(request: NextRequest) {\n  try {\n    const { signedTx } = await request.json();\n\n    if (!signedTx) {\n      return NextResponse.json(\n        { error: \"Missing signedTx\" },\n        { status: 400 }\n      );\n    }\n\n    const response = await fetch(MEV_BLOCKER_RPC, {\n      method: \"POST\",\n      headers: { \"Content-Type\": \"application/json\" },\n      body: JSON.stringify({\n        jsonrpc: \"2.0\",\n        method: \"eth_sendRawTransaction\",\n        params: [signedTx],\n        id: Date.now(),\n      }),\n    });\n\n    const data = await response.json();\n\n    if (data.error) {\n      return NextResponse.json(\n        { error: data.error.message },\n        { status: 400 }\n      );\n    }\n\n    return NextResponse.json({\n      success: true,\n      txHash: data.result,\n      sentVia: \"MEV-Blocker\",\n    });\n  } catch (error) {\n    console.error(\"[Private TX Error]\", error);\n    return NextResponse.json(\n      { error: \"Failed to send transaction\" },\n      { status: 500 }\n    );\n  }\n}"
+        }
+    ]
+}
