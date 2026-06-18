@@ -11,7 +11,11 @@ interface SendPageProps {
   selectedAddressIndex?: number;
 }
 
-export function SendPage({ wallet, network, selectedAddressIndex = 0 }: SendPageProps) {
+export function SendPage({
+  wallet,
+  network,
+  selectedAddressIndex = 0,
+}: SendPageProps) {
   const [showBuilder, setShowBuilder] = useState(true);
 
   return (
@@ -27,6 +31,7 @@ export function SendPage({ wallet, network, selectedAddressIndex = 0 }: SendPage
       {!showBuilder && (
         <div className="text-center py-12">
           <p className="text-slate-400 mb-6">Transaction completed!</p>
+
           <button
             onClick={() => setShowBuilder(true)}
             className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition"
