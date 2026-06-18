@@ -1,365 +1,371 @@
 "use client";
 
 import { useState } from "react";
-import { encryptMnemonic } from "@/lib/encryption";
 import { PrivacyWallet } from "@/lib/hdWallet";
+import { encryptMnemonic } from "@/lib/encryption";
+import { NetworkId, NETWORKS } from "@/lib/networks";
 
-type Mode = "menu" | "import" | "generate";
-
-type ImportWalletProps = {
+interface ImportWalletProps {
   onSuccess: (wallet: PrivacyWallet) => void;
-  selectedNetwork: "sepolia" | "goerli";
-  onNetworkChange: (network: "sepolia" | "goerli") => void;
-};
-export function ImportWallet({
-  onSuccess,
-  selectedNetwork,
-  onNetworkChange,
-}: ImportWalletProps) {
-  const [mode, setMode] = useState<Mode>("menu");
-  const [mnemonic, setMnemonic] = useState("");
+  selectedNetwork: NetworkId;
+  onNetworkChange: (network: NetworkId) => void;
+}
+
+export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: ImportWalletProps) {
+  const [step, setStep] = useState<"landing" | "setup">("landing");
+  const [mode, setMode] = useState<"generate" | "import">("generate");
+  const [seedPhrase, setSeedPhrase] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [generatedMnemonic, setGeneratedMnemonic] = useState("");
-  const [copied, setCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [generatedSeed, setGeneratedSeed] = useState("");
 
-  const handleImport = async (e: React.FormEvent) => {
+  const handleGenerateWallet = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const { mnemonic, wallet } = PrivacyWallet.generateTestnetWallet();
+      setGeneratedSeed(mnemonic);
+      setSeedPhrase(mnemonic);
+      setStep("setup");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImportWallet = () => {
+    setStep("setup");
+  };
+
+  const handleCreateWallet = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!seedPhrase) {
+      setError("Seed phrase is required");
+      return;
+    }
+
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (!mnemonic.trim()) throw new Error("Mnemonic required");
-      if (password !== confirm) throw new Error("Passwords don't match");
-      if (password.length < 12) throw new Error("Password too weak (min 12 chars)");
+      const wallet = new PrivacyWallet(seedPhrase);
+      const encrypted = encryptMnemonic(seedPhrase, password);
 
-      const wallet = new PrivacyWallet(mnemonic);
-      const encrypted = encryptMnemonic(mnemonic, password);
       localStorage.setItem("encrypted_wallet", encrypted);
-      localStorage.setItem("wallet_password_hint", password.substring(0, 2) + "***");
+      localStorage.setItem("selected_network", selectedNetwork);
 
-      setMnemonic("");
-      setPassword("");
-      setConfirm("");
       onSuccess(wallet);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to create wallet");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGenerate = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      if (!password) throw new Error("Password required");
-      if (password !== confirm) throw new Error("Passwords don't match");
-      if (password.length < 12) throw new Error("Password too weak (min 12 chars)");
-
-      // Generate a new testnet wallet
-      const { mnemonic: newMnemonic, wallet } = PrivacyWallet.generateTestnetWallet();
-      
-      // Encrypt and store
-      const encrypted = encryptMnemonic(newMnemonic, password);
-      localStorage.setItem("encrypted_wallet", encrypted);
-      localStorage.setItem("wallet_password_hint", password.substring(0, 2) + "***");
-
-      setGeneratedMnemonic(newMnemonic);
-      setPassword("");
-      setConfirm("");
-      
-      // Auto-proceed to wallet after 2 seconds
-      setTimeout(() => onSuccess(wallet), 2000);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedMnemonic);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Menu screen - choose import or generate
-  if (mode === "menu") {
+  // Landing Page
+  if (step === "landing") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-12">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 mb-4">
-              <span className="text-3xl">🔒</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        {/* Header with Logo */}
+        <div className="border-b border-slate-800/50 px-8 py-4">
+          <div className="max-w-6xl mx-auto flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center font-bold text-slate-950">
+              A
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">Privacy Wallet</h1>
-            <p className="text-sm text-slate-500 mt-2">Secure key management for testnet</p>
+            <div>
+              <p className="font-bold text-white text-lg">AnonWallet</p>
+              <p className="text-xs text-teal-400 font-semibold">testnet</p>
+            </div>
           </div>
+        </div>
 
-          <div className="space-y-3">
-            {/* Generate Testnet Wallet Button */}
-            <button
-              onClick={() => setMode("generate")}
-              className="w-full px-6 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition shadow-lg"
-            >
-              <div className="text-lg mb-1">✨ Generate Testnet Wallet</div>
-              <div className="text-xs opacity-90">Create a new random wallet (easiest)</div>
-            </button>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="grid grid-cols-2 gap-16 max-w-6xl w-full">
+            {/* Left: Marketing Copy */}
+            <div className="flex flex-col justify-center">
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-500/50 mb-6">
+                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></span>
+                  <span className="text-xs font-semibold text-teal-300">LIVE ON TESTNET</span>
+                </div>
+              </div>
 
-            {/* Import Existing Wallet Button */}
-            <button
-              onClick={() => setMode("import")}
-              className="w-full px-6 py-4 bg-blue-900 hover:bg-blue-800 text-white font-semibold rounded-lg transition"
-            >
-              <div className="text-lg mb-1">📥 Import Existing Wallet</div>
-              <div className="text-xs opacity-90">Use your own mnemonic seed phrase</div>
-            </button>
-          </div>
+              <h1 className="text-5xl font-bold text-white mb-4 leading-tight">
+                Your transactions.{" "}
+                <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                  Invisible.
+                </span>
+              </h1>
 
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs font-semibold text-blue-900 mb-2">🔐 How It Works</p>
-            <ul className="text-xs text-blue-800 space-y-1">
-              <li>✓ Keys stay encrypted locally</li>
-              <li>✓ Never sent to any server</li>
-              <li>✓ All signing happens in browser</li>
-            </ul>
+              <p className="text-lg text-slate-400 mb-8 leading-relaxed">
+                A privacy-first Web3 wallet that generates fresh addresses for every transaction — so no one can trace your on-chain activity.
+              </p>
+
+              {/* Features */}
+              <div className="space-y-4 mb-8">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-1">🔐</div>
+                  <div>
+                    <p className="font-semibold text-white">Non-custodial</p>
+                    <p className="text-sm text-slate-500">Keys stay in your browser, always</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-1">📍</div>
+                  <div>
+                    <p className="font-semibold text-white">Fresh address per tx</p>
+                    <p className="text-sm text-slate-500">Breaks on-chain transaction linking</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-1">🌐</div>
+                  <div>
+                    <p className="font-semibold text-white">Multi-network</p>
+                    <p className="text-sm text-slate-500">Scroll Sepolia & Sepolia testnets</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Supported Networks */}
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Supported networks</p>
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <span className="text-xs text-slate-400">Scroll Sepolia</span>
+                </div>
+                <div className="flex gap-2 ml-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-xs text-slate-400">Sepolia</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Setup Card */}
+            <div className="flex flex-col justify-center">
+              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-2xl p-8 backdrop-blur-xl">
+                <h2 className="text-2xl font-bold text-white mb-2">Get started</h2>
+                <p className="text-slate-400 text-sm mb-8">Create a new wallet or import an existing one.</p>
+
+                {/* Mode Selector */}
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                  <button
+                    onClick={() => {
+                      setMode("generate");
+                      setSeedPhrase("");
+                    }}
+                    className={`p-4 rounded-lg font-semibold transition ${
+                      mode === "generate"
+                        ? "bg-teal-500/20 border border-teal-500/50 text-teal-300"
+                        : "bg-slate-700/50 border border-slate-600 text-slate-400 hover:bg-slate-700"
+                    }`}
+                  >
+                    Generate New
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMode("import");
+                      setGeneratedSeed("");
+                    }}
+                    className={`p-4 rounded-lg font-semibold transition ${
+                      mode === "import"
+                        ? "bg-teal-500/20 border border-teal-500/50 text-teal-300"
+                        : "bg-slate-700/50 border border-slate-600 text-slate-400 hover:bg-slate-700"
+                    }`}
+                  >
+                    Import Existing
+                  </button>
+                </div>
+
+                {/* Generate Mode */}
+                {mode === "generate" && (
+                  <button
+                    onClick={handleGenerateWallet}
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition shadow-lg mb-6"
+                  >
+                    {loading ? "Generating..." : "Generate New Wallet"}
+                  </button>
+                )}
+
+                {/* Import Mode */}
+                {mode === "import" && (
+                  <>
+                    <div className="mb-6">
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">Seed Phrase (12 or 24 words)</label>
+                      <textarea
+                        value={seedPhrase}
+                        onChange={(e) => setSeedPhrase(e.target.value)}
+                        placeholder="Enter your seed phrase here..."
+                        className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
+                        rows={4}
+                      />
+                    </div>
+                    <button
+                      onClick={handleImportWallet}
+                      disabled={!seedPhrase.trim()}
+                      className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition shadow-lg"
+                    >
+                      Continue
+                    </button>
+                  </>
+                )}
+
+                {/* Security Features */}
+                <div className="mt-8 pt-8 border-t border-slate-700 space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>🔒</span>
+                    <span>Local keys</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>✓</span>
+                    <span>No servers</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>🔐</span>
+                    <span>Open source</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Generate screen - show generated mnemonic
-  if (mode === "generate" && generatedMnemonic) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900">Your Testnet Wallet Created! ✨</h1>
-            <p className="text-sm text-slate-500 mt-2">Save your seed phrase in a safe place</p>
+  // Setup Page (Password & Confirmation)
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg">
+        <div className="text-center mb-8">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-teal-500/20 border border-teal-500/30 mb-4">
+            <span className="text-3xl">🔐</span>
           </div>
+          <h1 className="text-2xl font-bold text-white">Secure Your Wallet</h1>
+          <p className="text-sm text-slate-400 mt-2">Set a password to encrypt your seed phrase</p>
+        </div>
 
-          {/* Mnemonic Display */}
-          <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-6">
-            <p className="text-xs font-semibold text-yellow-900 mb-3">⚠️ SAVE THIS SEED PHRASE</p>
-            <p className="text-sm font-mono text-black bg-white p-3 rounded border border-yellow-200 break-words leading-relaxed mb-4 max-h-32 overflow-y-auto">
-              {generatedMnemonic}
+        {generatedSeed && (
+          <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-xl p-6 mb-8">
+            <p className="text-sm font-semibold text-yellow-300 mb-3">📝 Save Your Seed Phrase</p>
+            <div className="bg-slate-900 rounded-lg p-4 border border-slate-700 mb-4">
+              <p className="text-sm font-mono text-slate-300 break-words">{generatedSeed}</p>
+            </div>
+            <p className="text-xs text-yellow-200">
+              Write this down and keep it safe. You'll need it to recover your wallet.
             </p>
-            <button
-              onClick={copyToClipboard}
-              className="w-full px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold rounded transition"
+          </div>
+        )}
+
+        <form onSubmit={handleCreateWallet} className="space-y-4">
+          {/* Password Input */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a strong password"
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
+            />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
+              <p className="text-sm font-semibold text-red-300">❌ {error}</p>
+            </div>
+          )}
+
+          {/* Network Selector */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Starting Network</label>
+            <select
+              value={selectedNetwork}
+              onChange={(e) => onNetworkChange(e.target.value as NetworkId)}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
             >
-              {copied ? "✓ Copied to clipboard" : "📋 Copy to clipboard"}
-            </button>
+              {Object.entries(NETWORKS).map(([id, config]) => (
+                <option key={id} value={id}>
+                  {config.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Important Warning */}
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-xs font-semibold text-red-800 mb-2">🚨 Important</p>
-            <ul className="text-xs text-red-700 space-y-1">
-              <li>• Write this down on paper (not digital)</li>
-              <li>• Never share this phrase with anyone</li>
-              <li>• Anyone with this phrase controls your wallet</li>
-            </ul>
-          </div>
+          {/* Create Wallet Button */}
+          <button
+            type="submit"
+            disabled={loading || !password}
+            className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition shadow-lg mt-6"
+          >
+            {loading ? "Creating Wallet..." : "Create Wallet"}
+          </button>
 
-          <p className="text-xs text-slate-500 text-center">
-            ✓ Wallet created and encrypted. Redirecting in a moment...
+          {/* Back Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setStep("landing");
+              setSeedPhrase("");
+              setPassword("");
+              setConfirmPassword("");
+            }}
+            className="w-full text-slate-400 hover:text-slate-300 text-sm font-medium transition"
+          >
+            ← Back
+          </button>
+        </form>
+
+        {/* Info Box */}
+        <div className="mt-8 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg">
+          <p className="text-xs text-blue-200">
+            <span className="font-semibold">🔒 Your password:</span> Encrypts your seed phrase before storing locally. Never shared with servers.
           </p>
         </div>
       </div>
-    );
-  }
-
-  // Generate screen - enter password
-  if (mode === "generate") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <button
-            onClick={() => setMode("menu")}
-            className="mb-6 text-blue-600 hover:text-blue-700 text-sm font-semibold"
-          >
-            ← Back
-          </button>
-
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900">Create New Wallet</h1>
-            <p className="text-sm text-slate-500 mt-2">Set a password to encrypt your seed phrase</p>
-          </div>
-
-          <form onSubmit={handleGenerate} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Strong password (12+ chars)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700 text-sm"
-                >
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="Repeat password"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700 text-sm"
-                >
-                  {showConfirm ? "👁️" : "👁️‍🗨️"}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm font-semibold text-red-800">⚠️ Error</p>
-                <p className="text-xs text-red-700">{error}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg disabled:opacity-50 transition"
-            >
-              {loading ? "Generating..." : "Generate Wallet"}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // Import screen
-  if (mode === "import") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <button
-            onClick={() => setMode("menu")}
-            className="mb-6 text-blue-600 hover:text-blue-700 text-sm font-semibold"
-          >
-            ← Back
-          </button>
-
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900">Import Wallet</h1>
-            <p className="text-sm text-slate-500 mt-2">Enter your existing BIP-39 seed phrase</p>
-          </div>
-
-          <form onSubmit={handleImport} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                BIP-39 Mnemonic
-              </label>
-              <textarea
-                value={mnemonic}
-                onChange={(e) => setMnemonic(e.target.value)}
-                placeholder="word1 word2 word3 ... (12 or 24 words)"
-                rows={3}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm font-mono"
-                spellCheck="false"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Strong password (12+ chars)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700 text-sm"
-                >
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="Repeat password"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-700 text-sm"
-                >
-                  {showConfirm ? "👁️" : "👁️‍🗨️"}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm font-semibold text-red-800">⚠️ Error</p>
-                <p className="text-xs text-red-700">{error}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full px-4 py-3 bg-blue-900 text-white font-semibold rounded-lg hover:bg-blue-800 disabled:opacity-50 transition"
-            >
-              {loading ? "Importing..." : "Import Wallet"}
-            </button>
-          </form>
-
-          <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs font-semibold text-blue-900">🔐 Security Guarantee</p>
-            <p className="text-xs text-blue-800 mt-1">
-              Your keys stay encrypted in the browser. Never sent to any server.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 }

@@ -5,27 +5,36 @@ import { PrivacyWallet } from "@/lib/hdWallet";
 import { decryptMnemonic } from "@/lib/encryption";
 import { NetworkId } from "@/lib/networks";
 import { ImportWallet } from "./components/ImportWallet";
-import { Dashboard } from "./components/Dashboard";
+import { WalletLayout } from "./components/WalletLayout";
+import { OverviewPage } from "./components/OverviewPage";
+import { AddressesPage } from "./components/AddressesPage";
+import { SendPage } from "./components/SendPage";
+import { HistoryPage } from "./components/HistoryPage";
+import { SettingsPage } from "./components/SettingsPage";
 
-type View = "import" | "dashboard" | "unlock";
+type View = "import" | "wallet";
+type WalletPage = "overview" | "addresses" | "send" | "history" | "settings";
 
 export default function Home() {
   const [view, setView] = useState<View>("import");
   const [wallet, setWallet] = useState<PrivacyWallet | null>(null);
   const [network, setNetwork] = useState<NetworkId>("sepolia");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState<WalletPage>("overview");
   const [passwordAttempt, setPasswordAttempt] = useState("");
   const [unlockError, setUnlockError] = useState("");
+  const [selectedAddressIndex, setSelectedAddressIndex] = useState(0);
 
-  // Initialize on mount
   useEffect(() => {
     const encrypted = localStorage.getItem("encrypted_wallet");
     const savedNetwork = (localStorage.getItem("selected_network") as NetworkId) || "sepolia";
-    
+
     setNetwork(savedNetwork);
-    
+
     if (encrypted) {
-      setView("unlock");
+      setView("wallet");
+    } else {
+      setView("import");
     }
     setLoading(false);
   }, []);
@@ -33,7 +42,7 @@ export default function Home() {
   const handleImportSuccess = (newWallet: PrivacyWallet) => {
     setWallet(newWallet);
     localStorage.setItem("selected_network", network);
-    setView("dashboard");
+    setView("wallet");
   };
 
   const handleNetworkChange = (newNetwork: NetworkId) => {
@@ -48,16 +57,16 @@ export default function Home() {
     try {
       const encrypted = localStorage.getItem("encrypted_wallet");
       const savedNetwork = (localStorage.getItem("selected_network") as NetworkId) || "sepolia";
-      
+
       if (!encrypted) throw new Error("No wallet found");
 
       const mnemonic = decryptMnemonic(encrypted, passwordAttempt);
       const unlockedWallet = new PrivacyWallet(mnemonic);
-      
+
       setWallet(unlockedWallet);
       setNetwork(savedNetwork);
       setPasswordAttempt("");
-      setView("dashboard");
+      setView("wallet");
     } catch (err: any) {
       setUnlockError("Wrong password");
     }
@@ -66,110 +75,129 @@ export default function Home() {
   const handleLock = () => {
     setWallet(null);
     setPasswordAttempt("");
-    setView("unlock");
+    setView("import");
   };
 
-  const handleForgetWallet = () => {
-    if (confirm("Are you sure? This will delete the encrypted wallet from this device.")) {
-      localStorage.removeItem("encrypted_wallet");
-      localStorage.removeItem("wallet_password_hint");
-      localStorage.removeItem("selected_network");
-      setWallet(null);
-      setNetwork("sepolia");
-      setView("import");
-    }
+  const handleSendFromAddress = (addressIndex: number) => {
+    setSelectedAddressIndex(addressIndex);
+    setCurrentPage("send");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4">🔒</div>
+          <div className="text-4xl mb-4">🔐</div>
           <p className="text-white text-lg">Loading wallet...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <>
-      {view === "import" && (
-        <ImportWallet 
-          onSuccess={handleImportSuccess}
-          selectedNetwork={network}
-          onNetworkChange={handleNetworkChange}
-        />
-      )}
-      
-      {view === "unlock" && (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm">
-            <div className="text-center mb-8">
-              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 mb-4">
-                <span className="text-3xl">🔐</span>
-              </div>
-              <h1 className="text-2xl font-bold text-slate-900">Unlock Wallet</h1>
-              <p className="text-sm text-slate-500 mt-2">
-                Network: <span className="font-semibold text-slate-700">{network}</span>
-              </p>
+  if (view === "import") {
+    return <ImportWallet onSuccess={handleImportSuccess} selectedNetwork={network} onNetworkChange={handleNetworkChange} />;
+  }
+
+  if (!wallet) {
+    // Unlock screen
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-50/10 mb-4">
+              <span className="text-3xl">🔐</span>
             </div>
-
-            <form onSubmit={handleUnlock} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordAttempt}
-                  onChange={(e) => setPasswordAttempt(e.target.value)}
-                  placeholder="Enter password"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm"
-                  autoFocus
-                />
-              </div>
-
-              {unlockError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm font-semibold text-red-800">❌ {unlockError}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="w-full px-4 py-3 bg-blue-900 text-white font-semibold rounded-lg hover:bg-blue-800 transition"
-              >
-                Unlock Wallet
-              </button>
-            </form>
-
-            <div className="mt-6 space-y-3">
-              <button
-                onClick={handleForgetWallet}
-                className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 font-semibold rounded-lg transition text-sm"
-              >
-                Forget This Wallet
-              </button>
-            </div>
-
-            <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs font-semibold text-blue-900">ℹ️ Wallet Detected</p>
-              <p className="text-xs text-blue-800 mt-1">
-                A wallet is saved on this device. Enter your password to unlock it.
-              </p>
-            </div>
+            <h1 className="text-2xl font-bold text-white">Unlock Wallet</h1>
+            <p className="text-sm text-slate-400 mt-2">Enter your password to continue</p>
           </div>
-        </div>
-      )}
 
-      {view === "dashboard" && wallet && (
-        <Dashboard 
-          wallet={wallet} 
+          <form onSubmit={handleUnlock} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-300 mb-2">Password</label>
+              <input
+                type="password"
+                value={passwordAttempt}
+                onChange={(e) => setPasswordAttempt(e.target.value)}
+                placeholder="Enter password"
+                className="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
+                autoFocus
+              />
+            </div>
+
+            {unlockError && (
+              <div className="p-3 bg-red-900/20 border border-red-600/30 rounded-lg">
+                <p className="text-sm font-semibold text-red-300">❌ {unlockError}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition"
+            >
+              Unlock Wallet
+            </button>
+          </form>
+
+          <button
+            onClick={() => {
+              if (confirm("Are you sure? This will delete the wallet from this device.")) {
+                localStorage.removeItem("encrypted_wallet");
+                localStorage.removeItem("selected_network");
+                setWallet(null);
+                setNetwork("sepolia");
+                setView("import");
+              }
+            }}
+            className="w-full mt-4 px-4 py-2 bg-red-900/20 hover:bg-red-900/30 border border-red-600/30 text-red-300 font-semibold rounded-lg transition"
+          >
+            Forget This Wallet
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <WalletLayout
+      wallet={wallet}
+      network={network}
+      onNetworkChange={handleNetworkChange}
+      onLock={handleLock}
+      currentPage={currentPage}
+      onPageChange={setCurrentPage}
+    >
+      {currentPage === "overview" && (
+        <OverviewPage
+          wallet={wallet}
           network={network}
-          onNetworkChange={handleNetworkChange}
-          onLock={handleLock} 
+          onSendClick={() => setCurrentPage("send")}
+          onHistoryClick={() => setCurrentPage("history")}
         />
       )}
-    </>
+
+      {currentPage === "addresses" && (
+        <AddressesPage
+          wallet={wallet}
+          network={network}
+          onSendFromAddress={handleSendFromAddress}
+        />
+      )}
+
+      {currentPage === "send" && (
+        <SendPage
+          wallet={wallet}
+          network={network}
+          selectedAddressIndex={selectedAddressIndex}
+        />
+      )}
+
+      {currentPage === "history" && (
+        <HistoryPage network={network} />
+      )}
+
+      {currentPage === "settings" && (
+        <SettingsPage network={network} onLock={handleLock} />
+      )}
+    </WalletLayout>
   );
 }
