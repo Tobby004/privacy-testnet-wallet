@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PrivacyWallet } from "@/lib/hdWallet";
-import { NetworkId, NETWORKS } from "@/lib/networks";
+import { NetworkId } from "@/lib/networks";
 import { TransactionBuilder } from "./TransactionBuilder";
 
 interface SendPageProps {
@@ -13,7 +13,6 @@ interface SendPageProps {
 
 export function SendPage({ wallet, network, selectedAddressIndex = 0 }: SendPageProps) {
   const [showBuilder, setShowBuilder] = useState(true);
-  const networkConfig = NETWORKS[network];
 
   return (
     <div className="max-w-2xl">
@@ -22,8 +21,6 @@ export function SendPage({ wallet, network, selectedAddressIndex = 0 }: SendPage
           wallet={wallet}
           network={network}
           onClose={() => setShowBuilder(false)}
-          isFullPage={true}
-          defaultAddressIndex={selectedAddressIndex}
         />
       )}
 
@@ -32,7 +29,7 @@ export function SendPage({ wallet, network, selectedAddressIndex = 0 }: SendPage
           <p className="text-slate-400 mb-6">Transaction completed!</p>
           <button
             onClick={() => setShowBuilder(true)}
-            className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg transition"
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition"
           >
             Send Another Transaction
           </button>
