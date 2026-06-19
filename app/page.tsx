@@ -164,7 +164,7 @@ export default function Home() {
       onNetworkChange={handleNetworkChange}
       onLock={handleLock}
       currentPage={currentPage}
-      onPageChange={setCurrentPage}
+      onPageChange={(page: string) => setCurrentPage(page as WalletPage)}
     >
       {currentPage === "overview" && (
         <OverviewPage
