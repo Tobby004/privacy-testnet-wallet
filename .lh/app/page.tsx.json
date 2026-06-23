@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 23,
+            "activePatchIndex": 24,
             "patches": [
                 {
                     "date": 1781591906691,
@@ -100,6 +100,10 @@
                 {
                     "date": 1782241340448,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,8 +1,8 @@\n \"use client\";\n \n import { useState, useEffect } from \"react\";\n-import type { PrivacyWallet } from \"@/lib/hdWallet\";\n+import { PrivacyWallet } from \"@/lib/hdWallet\";\n import { decryptMnemonic } from \"@/lib/encryption\";\n import type { NetworkId } from \"@/lib/networks\";\n import { ImportWallet } from \"./components/ImportWallet\";\n import { WalletLayout } from \"./components/WalletLayout\";\n"
+                },
+                {
+                    "date": 1782242313884,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -71,9 +71,9 @@\n       const savedNetwork = (localStorage.getItem(\"selected_network\") as NetworkId) || \"sepolia\";\n \n       if (!encrypted) throw new Error(\"No wallet found\");\n \n-      const mnemonic = decryptMnemonic(encrypted, passwordAttempt);\n+      const mnemonic = await decryptMnemonic(encrypted, passwordAttempt);\n       const unlockedWallet = new PrivacyWallet(mnemonic);\n \n       setWallet(unlockedWallet);\n       setNetwork(savedNetwork);\n"
                 }
             ],
             "date": 1781591906691,
