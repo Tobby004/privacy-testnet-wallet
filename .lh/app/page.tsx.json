@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 22,
+            "activePatchIndex": 23,
             "patches": [
                 {
                     "date": 1781591906691,
@@ -96,6 +96,10 @@
                 {
                     "date": 1782234022982,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -177,13 +177,15 @@\n       onLock={handleLock}\n       currentPage={currentPage}\n       onPageChange={(page: string) => setCurrentPage(page as WalletPage)}\n     >\n-     {currentPage === \"overview\" && (\n+  {currentPage === \"overview\" && (\n   <OverviewPage \n     wallet={wallet} \n     network={network}\n-    onNavigate={(page: string) => setCurrentPage(page as WalletPage)}\n+    onSendClick={() => setCurrentPage(\"send\")}\n+    onHistoryClick={() => setCurrentPage(\"history\")}\n+    onReceiveClick={() => setCurrentPage(\"receive\")}\n   />\n )}\n \n       {currentPage === \"addresses\" && (\n@@ -207,9 +209,8 @@\n     network={network}\n     selectedAddressIndex={selectedAddressIndex}\n   />\n )}\n-\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n \n"
+                },
+                {
+                    "date": 1782241340448,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,8 +1,8 @@\n \"use client\";\n \n import { useState, useEffect } from \"react\";\n-import type { PrivacyWallet } from \"@/lib/hdWallet\";\n+import { PrivacyWallet } from \"@/lib/hdWallet\";\n import { decryptMnemonic } from \"@/lib/encryption\";\n import type { NetworkId } from \"@/lib/networks\";\n import { ImportWallet } from \"./components/ImportWallet\";\n import { WalletLayout } from \"./components/WalletLayout\";\n"
                 }
             ],
             "date": 1781591906691,
