@@ -9,9 +9,9 @@ import { WalletLayout } from "./components/WalletLayout";
 import { OverviewPage } from "./components/OverviewPage";
 import { AddressesPage } from "./components/AddressesPage";
 import { SendPage } from "./components/SendPage";
-import { ReceivePage } from "./components/ReceivePage";
 import { HistoryPage } from "./components/HistoryPage";
 import { SettingsPage } from "./components/SettingsPage";
+import { ReceivePage } from "./components/ReceivePage";
 
 type View = "import" | "wallet";
 type WalletPage =
@@ -19,7 +19,7 @@ type WalletPage =
   | "addresses"
   | "send"
   | "history"
-  |  "receive"
+    "receive"
   | "settings";
 
 export default function Home() {
@@ -94,6 +94,7 @@ const handleUnlock = async (e: React.FormEvent) => {
     setSelectedAddressIndex(addressIndex);
     setCurrentPage("send");
   };
+  
 
   if (loading) {
     return (
@@ -178,15 +179,14 @@ const handleUnlock = async (e: React.FormEvent) => {
       currentPage={currentPage}
       onPageChange={(page: string) => setCurrentPage(page as WalletPage)}
     >
-  {currentPage === "overview" && (
-  <OverviewPage 
-    wallet={wallet} 
-    network={network}
-    onSendClick={() => setCurrentPage("send")}
-    onHistoryClick={() => setCurrentPage("history")}
-    onReceiveClick={() => setCurrentPage("receive")}
-  />
-)}
+      {currentPage === "overview" && (
+        <OverviewPage
+          wallet={wallet}
+          network={network}
+          onSendClick={() => setCurrentPage("send")}
+          onHistoryClick={() => setCurrentPage("history")}
+        />
+      )}
 
       {currentPage === "addresses" && (
         <AddressesPage
@@ -203,13 +203,7 @@ const handleUnlock = async (e: React.FormEvent) => {
           selectedAddressIndex={selectedAddressIndex}
         />
       )}
-      {currentPage === "receive" && (
-  <ReceivePage
-    wallet={wallet}
-    network={network}
-    selectedAddressIndex={selectedAddressIndex}
-  />
-)}
+
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}

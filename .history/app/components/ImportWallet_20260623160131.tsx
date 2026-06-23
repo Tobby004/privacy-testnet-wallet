@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PrivacyWallet } from "@/lib/hdWallet";
-import { encryptMnemonic, decryptMnemonic } from "@/lib/encryption";
+import { encryptMnemonic } from "@/lib/encryption";
 import { NetworkId, NETWORKS } from "@/lib/networks";
 
 interface ImportWalletProps {
@@ -12,54 +12,22 @@ interface ImportWalletProps {
 }
 
 export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: ImportWalletProps) {
-  const [step, setStep] = useState<"landing" | "setup" | "unlock">("landing");
+  const [step, setStep] = useState<"landing" | "setup">("landing");
   const [mode, setMode] = useState<"generate" | "import">("generate");
   const [seedPhrase, setSeedPhrase] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [unlockPassword, setUnlockPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [generatedSeed, setGeneratedSeed] = useState("");
-  const [hasEncryptedWallet, setHasEncryptedWallet] = useState(false);
-
-  // Check if wallet exists on mount
-  useEffect(() => {
-    const encrypted = localStorage.getItem("encrypted_wallet");
-    setHasEncryptedWallet(!!encrypted);
-    if (encrypted) {
-      setStep("unlock");
-    }
-  }, []);
-
-  // Unlock wallet
-  const handleUnlockWallet = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const encrypted = localStorage.getItem("encrypted_wallet");
-      if (!encrypted) throw new Error("No wallet found");
-
-      const mnemonic = await decryptMnemonic(encrypted, unlockPassword);
-      const wallet = new PrivacyWallet(mnemonic);
-      
-      onSuccess(wallet);
-    } catch (err: any) {
-      setError("❌ Incorrect password");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGenerateWallet = async () => {
     setError("");
     setLoading(true);
 
     try {
-      const { mnemonic } = PrivacyWallet.generateTestnetWallet();
+      const { mnemonic, wallet } = PrivacyWallet.generateTestnetWallet();
       setGeneratedSeed(mnemonic);
       setSeedPhrase(mnemonic);
       setStep("setup");
@@ -115,82 +83,11 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
     }
   };
 
-  // UNLOCK PAGE
-  if (step === "unlock") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
-        <div className="w-full max-w-lg">
-          <div className="text-center mb-8">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-teal-500/20 border border-teal-500/30 mb-4">
-              <span className="text-3xl">🔓</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white">Unlock Your Wallet</h1>
-            <p className="text-sm text-slate-400 mt-2">Enter your password to continue</p>
-          </div>
-
-          <form onSubmit={handleUnlockWallet} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-2">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={unlockPassword}
-                  onChange={(e) => setUnlockPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
-                >
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
-                <p className="text-sm font-semibold text-red-300">{error}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || !unlockPassword}
-              className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition shadow-lg mt-6"
-            >
-              {loading ? "Unlocking..." : "Unlock Wallet"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setStep("landing");
-                setUnlockPassword("");
-                setError("");
-              }}
-              className="w-full text-slate-400 hover:text-slate-300 text-sm font-medium transition"
-            >
-              ← Import Different Wallet
-            </button>
-          </form>
-
-          <div className="mt-8 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg">
-            <p className="text-xs text-blue-200">
-              🔐 Your wallet is encrypted and stored locally. No servers involved.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // LANDING PAGE
+  // Landing Page
   if (step === "landing") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        {/* Header with Logo */}
         <div className="border-b border-slate-800/50 px-8 py-4">
           <div className="max-w-6xl mx-auto flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center font-bold text-slate-950">
@@ -205,6 +102,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
 
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="grid grid-cols-2 gap-16 max-w-6xl w-full">
+            {/* Left: Marketing Copy */}
             <div className="flex flex-col justify-center">
               <div className="mb-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-500/50 mb-6">
@@ -224,6 +122,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
                 A privacy-first Web3 wallet that generates fresh addresses for every transaction — so no one can trace your on-chain activity.
               </p>
 
+              {/* Features */}
               <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl mt-1">🔐</div>
@@ -243,17 +142,32 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
                   <div className="text-2xl mt-1">🌐</div>
                   <div>
                     <p className="font-semibold text-white">Multi-network</p>
-                    <p className="text-sm text-slate-500">Sepolia testnet</p>
+                    <p className="text-sm text-slate-500">Scroll Sepolia & Sepolia testnets</p>
                   </div>
+                </div>
+              </div>
+
+              {/* Supported Networks */}
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Supported networks</p>
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <span className="text-xs text-slate-400">Scroll Sepolia</span>
+                </div>
+                <div className="flex gap-2 ml-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-xs text-slate-400">Sepolia</span>
                 </div>
               </div>
             </div>
 
+            {/* Right: Setup Card */}
             <div className="flex flex-col justify-center">
               <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-2xl p-8 backdrop-blur-xl">
                 <h2 className="text-2xl font-bold text-white mb-2">Get started</h2>
                 <p className="text-slate-400 text-sm mb-8">Create a new wallet or import an existing one.</p>
 
+                {/* Mode Selector */}
                 <div className="grid grid-cols-2 gap-3 mb-8">
                   <button
                     onClick={() => {
@@ -283,6 +197,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
                   </button>
                 </div>
 
+                {/* Generate Mode */}
                 {mode === "generate" && (
                   <button
                     onClick={handleGenerateWallet}
@@ -293,6 +208,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
                   </button>
                 )}
 
+                {/* Import Mode */}
                 {mode === "import" && (
                   <>
                     <div className="mb-6">
@@ -315,6 +231,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
                   </>
                 )}
 
+                {/* Security Features */}
                 <div className="mt-8 pt-8 border-t border-slate-700 space-y-2">
                   <div className="flex items-center gap-2 text-xs text-slate-400">
                     <span>🔒</span>
@@ -337,7 +254,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
     );
   }
 
-  // SETUP PAGE (Password & Confirmation)
+  // Setup Page (Password & Confirmation)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
@@ -362,6 +279,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
         )}
 
         <form onSubmit={handleCreateWallet} className="space-y-4">
+          {/* Password Input */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Password</label>
             <div className="relative">
@@ -382,6 +300,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
             </div>
           </div>
 
+          {/* Confirm Password */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Confirm Password</label>
             <input
@@ -393,12 +312,14 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
             />
           </div>
 
+          {/* Error Message */}
           {error && (
             <div className="p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
               <p className="text-sm font-semibold text-red-300">❌ {error}</p>
             </div>
           )}
 
+          {/* Network Selector */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Starting Network</label>
             <select
@@ -414,6 +335,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
             </select>
           </div>
 
+          {/* Create Wallet Button */}
           <button
             type="submit"
             disabled={loading || !password}
@@ -422,6 +344,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
             {loading ? "Creating Wallet..." : "Create Wallet"}
           </button>
 
+          {/* Back Button */}
           <button
             type="button"
             onClick={() => {
@@ -436,6 +359,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
           </button>
         </form>
 
+        {/* Info Box */}
         <div className="mt-8 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg">
           <p className="text-xs text-blue-200">
             <span className="font-semibold">🔒 Your password:</span> Encrypts your seed phrase before storing locally. Never shared with servers.

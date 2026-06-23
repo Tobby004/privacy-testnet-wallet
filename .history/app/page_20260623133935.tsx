@@ -27,12 +27,10 @@ export function SendPage({
 
   const networkConfig = NETWORKS[network];
 
-  // Get sender address - extract .address property
-  let senderAddress = "Loading...";
+  // Get sender address
+  let senderAddress = "";
   try {
-    const addressObj = wallet.getDerivedAddress(selectedAddressIndex);
-    // addressObj has {address, privateKey, publicKey, path}
-    senderAddress = typeof addressObj === "string" ? addressObj : addressObj.address || "Unknown";
+    senderAddress = wallet.getDerivedAddress(selectedAddressIndex);
   } catch (err) {
     senderAddress = "Address #" + selectedAddressIndex;
   }
@@ -52,6 +50,7 @@ export function SendPage({
     setLoading(true);
 
     try {
+      // Validation
       if (!recipient) throw new Error("Recipient address required");
       if (!validateAddress(recipient)) throw new Error("Invalid recipient address");
       if (!amount) throw new Error("Amount required");
@@ -63,16 +62,15 @@ export function SendPage({
       const gasPriceNum = parseFloat(gasPrice);
       if (isNaN(gasPriceNum) || gasPriceNum <= 0) throw new Error("Invalid gas price");
 
-      // Mock transaction
-      const hash = "0x" + Math.random().toString(16).slice(2, 66);
-      setTxHash(hash);
+      // Mock transaction for now
+      setTxHash("0x" + Math.random().toString(16).slice(2, 66));
       setTxStatus("pending");
       setSuccess(true);
 
       // Save to history
       const history = JSON.parse(localStorage.getItem("tx_history") || "[]");
       history.unshift({
-        hash,
+        hash: txHash,
         from: senderAddress,
         to: recipient,
         value: amount,
@@ -83,6 +81,7 @@ export function SendPage({
       });
       localStorage.setItem("tx_history", JSON.stringify(history.slice(0, 50)));
 
+      // Reset form
       setRecipient("");
       setAmount("");
       setGasPrice("2");
@@ -98,18 +97,18 @@ export function SendPage({
       <div className="max-w-2xl">
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-8">
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">✓</div>
-            <h2 className="text-2xl font-bold text-green-400 mb-2">Transaction Sent!</h2>
+            <div className="text-6xl mb-4">⏳</div>
+            <h2 className="text-2xl font-bold text-yellow-400 mb-2">Transaction Pending</h2>
             <p className="text-slate-400 mb-6">Your transaction has been submitted</p>
 
             <div className="bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-700">
-              <p className="text-xs text-slate-400 mb-2">Hash</p>
+              <p className="text-xs text-slate-400 mb-2">Transaction Hash</p>
               <p className="text-sm font-mono text-blue-300 break-all">{txHash}</p>
               <button
                 onClick={() => navigator.clipboard.writeText(txHash)}
                 className="mt-3 w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm"
               >
-                📋 Copy
+                📋 Copy Hash
               </button>
             </div>
 
@@ -123,7 +122,10 @@ export function SendPage({
             </a>
 
             <button
-              onClick={() => setSuccess(false)}
+              onClick={() => {
+                setSuccess(false);
+                setTxHash("");
+              }}
               className="w-full mt-4 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg"
             >
               Send Another
@@ -146,9 +148,9 @@ export function SendPage({
           {/* From Address */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">
-              From
+              From Address
             </label>
-            <div className="px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-400 text-xs font-mono break-all">
+            <div className="px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-400 text-sm font-mono break-all">
               {senderAddress}
             </div>
           </div>
@@ -156,7 +158,7 @@ export function SendPage({
           {/* Recipient */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">
-              To
+              Recipient Address
             </label>
             <input
               type="text"
@@ -183,13 +185,14 @@ export function SendPage({
                 placeholder="0.1"
                 step="0.001"
                 min="0"
+                max="10"
                 className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">
-                Gas (Gwei)
+                Gas Price (Gwei)
               </label>
               <input
                 type="number"
@@ -203,12 +206,14 @@ export function SendPage({
             </div>
           </div>
 
-          {/* Privacy */}
+          {/* Privacy Notice */}
           <div className="bg-purple-900/20 border border-purple-600/30 rounded-lg p-4">
-            <p className="text-xs font-semibold text-purple-300">🔐 Privacy Protected</p>
-            <p className="text-xs text-purple-200 mt-2">
-              Sent via MEV-Blocker relay. Hidden from mempool.
-            </p>
+            <p className="text-xs font-semibold text-purple-300 mb-2">🔐 Privacy Protected</p>
+            <ul className="text-xs text-purple-200 space-y-1">
+              <li>✓ MEV-Blocker relay</li>
+              <li>✓ Fresh address per transaction</li>
+              <li>✓ Hidden from mempool</li>
+            </ul>
           </div>
 
           {/* Error */}

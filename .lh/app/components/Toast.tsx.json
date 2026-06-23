@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/components/Toast.tsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782239840069,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782239840069,
+            "name": "Commit-0",
+            "content": "\"use client\";\n\nimport { createContext, useContext, useState, useCallback, ReactNode } from \"react\";\nimport { CheckCircle, XCircle, Info, X } from \"lucide-react\";\n\ntype ToastType = \"success\" | \"error\" | \"info\";\n\ninterface Toast {\n  id: number;\n  message: string;\n  type: ToastType;\n}\n\ninterface ToastContextType {\n  showToast: (message: string, type?: ToastType) => void;\n}\n\nconst ToastContext = createContext<ToastContextType | undefined>(undefined);\n\nexport function useToast() {\n  const context = useContext(ToastContext);\n  if (!context) {\n    throw new Error(\"useToast must be used within a ToastProvider\");\n  }\n  return context;\n}\n\nexport function ToastProvider({ children }: { children: ReactNode }) {\n  const [toasts, setToasts] = useState<Toast[]>([]);\n\n  const showToast = useCallback((message: string, type: ToastType = \"info\") => {\n    const id = Date.now();\n    setToasts((prev) => [...prev, { id, message, type }]);\n    setTimeout(() => {\n      setToasts((prev) => prev.filter((t) => t.id !== id));\n    }, 3000);\n  }, []);\n\n  const removeToast = (id: number) => {\n    setToasts((prev) => prev.filter((t) => t.id !== id));\n  };\n\n  const icons = {\n    success: <CheckCircle className=\"w-5 h-5 text-green-400\" />,\n    error: <XCircle className=\"w-5 h-5 text-red-400\" />,\n    info: <Info className=\"w-5 h-5 text-blue-400\" />,\n  };\n\n  const borderColors = {\n    success: \"border-green-600/40\",\n    error: \"border-red-600/40\",\n    info: \"border-blue-600/40\",\n  };\n\n  return (\n    <ToastContext.Provider value={{ showToast }}>\n      {children}\n      <div className=\"fixed bottom-6 right-6 z-50 flex flex-col gap-3\">\n        {toasts.map((toast) => (\n          <div\n            key={toast.id}\n            className={`flex items-center gap-3 bg-slate-800 border ${borderColors[toast.type]} rounded-xl px-4 py-3 shadow-2xl min-w-[280px] animate-in slide-in-from-bottom-2`}\n          >\n            {icons[toast.type]}\n            <p className=\"text-sm text-slate-200 flex-1\">{toast.message}</p>\n            <button\n              onClick={() => removeToast(toast.id)}\n              className=\"text-slate-500 hover:text-slate-300 transition\"\n            >\n              <X className=\"w-4 h-4\" />\n            </button>\n          </div>\n        ))}\n      </div>\n    </ToastContext.Provider>\n  );\n}"
+        }
+    ]
+}

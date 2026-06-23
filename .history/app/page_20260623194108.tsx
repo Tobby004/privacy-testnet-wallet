@@ -178,13 +178,11 @@ const handleUnlock = async (e: React.FormEvent) => {
       currentPage={currentPage}
       onPageChange={(page: string) => setCurrentPage(page as WalletPage)}
     >
-  {currentPage === "overview" && (
+     {currentPage === "overview" && (
   <OverviewPage 
     wallet={wallet} 
     network={network}
-    onSendClick={() => setCurrentPage("send")}
-    onHistoryClick={() => setCurrentPage("history")}
-    onReceiveClick={() => setCurrentPage("receive")}
+    onNavigate={(page: string) => setCurrentPage(page as WalletPage)}
   />
 )}
 
@@ -210,6 +208,7 @@ const handleUnlock = async (e: React.FormEvent) => {
     selectedAddressIndex={selectedAddressIndex}
   />
 )}
+
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}

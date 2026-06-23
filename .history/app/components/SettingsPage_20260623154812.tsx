@@ -10,8 +10,8 @@ interface SettingsPageProps {
 }
 
 export function SettingsPage({ network, onLock }: SettingsPageProps) {
-  const [showExport, setShowExport] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [seedVisible, setSeedVisible] = useState(false);
   const [seed, setSeed] = useState("");
   const [exportPass, setExportPass] = useState("");
@@ -22,39 +22,32 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
   const [newPassConf, setNewPassConf] = useState("");
   const [passError, setPassError] = useState("");
   const [passSuccess, setPassSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const networkConfig = NETWORKS[network];
 
-  // Export Seed - ASYNC function
-  const exportSeed = async (e: React.FormEvent) => {
+  const exportSeed = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Export clicked");
+    console.log("Export clicked"); // DEBUG
     setExportError("");
-    setLoading(true);
 
     try {
       const enc = localStorage.getItem("encrypted_wallet");
       if (!enc) throw new Error("No wallet");
 
-      const decrypted = await decryptMnemonic(enc, exportPass);
+     const decrypted = await decryptMnemonic(encrypted, exportPassword);
       setSeed(decrypted);
       setSeedVisible(true);
       setExportPass("");
     } catch (err: any) {
       setExportError("❌ " + err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Change Password - ASYNC function
-  const changePass = async (e: React.FormEvent) => {
+  const changePass = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Password change clicked");
+    console.log("Password change clicked"); // DEBUG
     setPassError("");
     setPassSuccess("");
-    setLoading(true);
 
     try {
       if (!currPass || !newPass || !newPassConf) throw new Error("All fields required");
@@ -64,8 +57,8 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
       const enc = localStorage.getItem("encrypted_wallet");
       if (!enc) throw new Error("No wallet");
 
-      const mn = await decryptMnemonic(enc, currPass);
-      const newEnc = await encryptMnemonic(mn, newPass);
+      const mn = decryptMnemonic(enc, currPass);
+      const newEnc = encryptMnemonic(mn, newPass);
       localStorage.setItem("encrypted_wallet", newEnc);
 
       setPassSuccess("✓ Password changed!");
@@ -75,8 +68,6 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
       setTimeout(() => setPassSuccess(""), 3000);
     } catch (err: any) {
       setPassError("❌ " + err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -87,16 +78,16 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
         <button
           type="button"
           onClick={() => {
-            console.log("Toggle export:", !showExport);
-            setShowExport(!showExport);
+            console.log("Toggle export:", !exportOpen);
+            setExportOpen(!exportOpen);
           }}
           className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded mb-4 font-semibold text-white"
         >
           <span>👁️ Export Seed Phrase</span>
-          <span>{showExport ? "▼" : "→"}</span>
+          <span>{exportOpen ? "▼" : "→"}</span>
         </button>
 
-        {showExport && (
+        {exportOpen && (
           <form onSubmit={exportSeed} className="space-y-3 p-4 bg-slate-700/50 rounded">
             <input
               type="password"
@@ -107,17 +98,16 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
             />
             <button
               type="submit"
-              disabled={loading || !exportPass}
-              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white py-2 rounded font-semibold"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-semibold"
             >
-              {loading ? "Loading..." : "Show Seed"}
+              Show Seed
             </button>
             {exportError && <p className="text-red-400 text-sm">{exportError}</p>}
 
             {seedVisible && (
               <div className="mt-4 space-y-3">
                 <div className="bg-yellow-900/30 p-2 rounded text-xs text-yellow-300">
-                  ⚠️ Keep this safe! Anyone with this can access your wallet.
+                  ⚠️ Keep this safe!
                 </div>
                 <div className="bg-black p-3 rounded font-mono text-sm text-slate-300 break-words">
                   {seed}
@@ -140,16 +130,16 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
         <button
           type="button"
           onClick={() => {
-            console.log("Toggle password:", !showPassword);
-            setShowPassword(!showPassword);
+            console.log("Toggle password:", !passwordOpen);
+            setPasswordOpen(!passwordOpen);
           }}
           className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded mb-4 font-semibold text-white"
         >
           <span>🔑 Change Password</span>
-          <span>{showPassword ? "▼" : "→"}</span>
+          <span>{passwordOpen ? "▼" : "→"}</span>
         </button>
 
-        {showPassword && (
+        {passwordOpen && (
           <form onSubmit={changePass} className="space-y-3 p-4 bg-slate-700/50 rounded">
             <input
               type="password"
@@ -174,10 +164,9 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
             />
             <button
               type="submit"
-              disabled={loading || !currPass || !newPass || !newPassConf}
-              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white py-2 rounded font-semibold"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-semibold"
             >
-              {loading ? "Updating..." : "Change Password"}
+              Change Password
             </button>
             {passError && <p className="text-red-400 text-sm">{passError}</p>}
             {passSuccess && <p className="text-green-400 text-sm">{passSuccess}</p>}

@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1781591962005,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1782240327464,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,6 +1,7 @@\n import type { Metadata } from \"next\";\n import \"./globals.css\";\n+import { ToastProvider } from \"./components/Toast\";\n \n export const metadata: Metadata = {\n   title: \"Privacy Wallet\",\n   description: \"Secure, privacy-preserving wallet for testnet transactions\",\n@@ -12,8 +13,12 @@\n   children: React.ReactNode;\n }) {\n   return (\n     <html lang=\"en\">\n-      <body>{children}</body>\n+      <body className=\"antialiased\">\n+        <ToastProvider>\n+          {children}\n+        </ToastProvider>\n+      </body>\n     </html>\n   );\n }\n\\ No newline at end of file\n"
                 }
             ],
             "date": 1781591962005,

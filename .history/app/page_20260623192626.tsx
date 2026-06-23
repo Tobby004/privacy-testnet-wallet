@@ -12,6 +12,7 @@ import { SendPage } from "./components/SendPage";
 import { ReceivePage } from "./components/ReceivePage";
 import { HistoryPage } from "./components/HistoryPage";
 import { SettingsPage } from "./components/SettingsPage";
+import { ReceivePage } from "./components/ReceivePage";
 
 type View = "import" | "wallet";
 type WalletPage =
@@ -178,15 +179,14 @@ const handleUnlock = async (e: React.FormEvent) => {
       currentPage={currentPage}
       onPageChange={(page: string) => setCurrentPage(page as WalletPage)}
     >
-  {currentPage === "overview" && (
-  <OverviewPage 
-    wallet={wallet} 
-    network={network}
-    onSendClick={() => setCurrentPage("send")}
-    onHistoryClick={() => setCurrentPage("history")}
-    onReceiveClick={() => setCurrentPage("receive")}
-  />
-)}
+      {currentPage === "overview" && (
+        <OverviewPage
+          wallet={wallet}
+          network={network}
+          onSendClick={() => setCurrentPage("send")}
+          onHistoryClick={() => setCurrentPage("history")}
+        />
+      )}
 
       {currentPage === "addresses" && (
         <AddressesPage
@@ -210,6 +210,7 @@ const handleUnlock = async (e: React.FormEvent) => {
     selectedAddressIndex={selectedAddressIndex}
   />
 )}
+
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}

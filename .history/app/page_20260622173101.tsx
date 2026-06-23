@@ -1,68 +1,56 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { PrivacyWallet } from "@/lib/hdWallet";
+import { PrivacyWallet } from "@/lib/hdWallet";
 import { decryptMnemonic } from "@/lib/encryption";
-import type { NetworkId } from "@/lib/networks";
+import { NetworkId } from "@/lib/networks";
 import { ImportWallet } from "./components/ImportWallet";
 import { WalletLayout } from "./components/WalletLayout";
 import { OverviewPage } from "./components/OverviewPage";
 import { AddressesPage } from "./components/AddressesPage";
 import { SendPage } from "./components/SendPage";
-import { ReceivePage } from "./components/ReceivePage";
 import { HistoryPage } from "./components/HistoryPage";
 import { SettingsPage } from "./components/SettingsPage";
 
 type View = "import" | "wallet";
-type WalletPage =
-  | "overview"
-  | "addresses"
-  | "send"
-  | "history"
-  |  "receive"
-  | "settings";
+type WalletPage = "overview" | "addresses" | "send" | "history" | "settings";
 
 export default function Home() {
   const [view, setView] = useState<View>("import");
   const [wallet, setWallet] = useState<PrivacyWallet | null>(null);
   const [network, setNetwork] = useState<NetworkId>("sepolia");
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] =
-    useState<WalletPage>("overview");
+  const [currentPage, setCurrentPage] = useState<WalletPage>("overview");
   const [passwordAttempt, setPasswordAttempt] = useState("");
   const [unlockError, setUnlockError] = useState("");
   const [selectedAddressIndex, setSelectedAddressIndex] = useState(0);
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const encrypted = localStorage.getItem("encrypted_wallet");
-      const savedNetwork =
-        (localStorage.getItem("selected_network") as NetworkId) ??
-        "sepolia";
-      setNetwork(savedNetwork);
-      setView(encrypted ? "wallet" : "import");
-    } catch (error) {
-      console.error("Failed to load wallet settings:", error);
+    const encrypted = localStorage.getItem("encrypted_wallet");
+    const savedNetwork = (localStorage.getItem("selected_network") as NetworkId) || "sepolia";
+
+    setNetwork(savedNetwork);
+
+    if (encrypted) {
+      setView("wallet");
+    } else {
       setView("import");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }, []);
+
   const handleImportSuccess = (newWallet: PrivacyWallet) => {
     setWallet(newWallet);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("selected_network", network);
-    }
+    localStorage.setItem("selected_network", network);
     setView("wallet");
   };
- const handleNetworkChange = (newNetwork: NetworkId) => {
-  setNetwork(newNetwork);
-  if (typeof window !== "undefined") {
-    localStorage.setItem("selected_network", newNetwork);
-  }
-};
 
-const handleUnlock = async (e: React.FormEvent) => {
+  const handleNetworkChange = (newNetwork: NetworkId) => {
+    setNetwork(newNetwork);
+    localStorage.setItem("selected_network", newNetwork);
+  };
+
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     setUnlockError("");
 
@@ -178,15 +166,14 @@ const handleUnlock = async (e: React.FormEvent) => {
       currentPage={currentPage}
       onPageChange={(page: string) => setCurrentPage(page as WalletPage)}
     >
-  {currentPage === "overview" && (
-  <OverviewPage 
-    wallet={wallet} 
-    network={network}
-    onSendClick={() => setCurrentPage("send")}
-    onHistoryClick={() => setCurrentPage("history")}
-    onReceiveClick={() => setCurrentPage("receive")}
-  />
-)}
+      {currentPage === "overview" && (
+        <OverviewPage
+          wallet={wallet}
+          network={network}
+          onSendClick={() => setCurrentPage("send")}
+          onHistoryClick={() => setCurrentPage("history")}
+        />
+      )}
 
       {currentPage === "addresses" && (
         <AddressesPage
@@ -203,13 +190,7 @@ const handleUnlock = async (e: React.FormEvent) => {
           selectedAddressIndex={selectedAddressIndex}
         />
       )}
-      {currentPage === "receive" && (
-  <ReceivePage
-    wallet={wallet}
-    network={network}
-    selectedAddressIndex={selectedAddressIndex}
-  />
-)}
+
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}

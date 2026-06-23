@@ -48,7 +48,6 @@ export function WalletLayout({
             { id: "send", label: "Send", icon: "📤" },
             { id: "history", label: "History", icon: "📜" },
             { id: "settings", label: "Settings", icon: "⚙️" },
-            { id: "receive", label: "Receive", icon: "📥" },
           ].map((item) => (
             <button
               key={item.id}

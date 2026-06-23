@@ -4,32 +4,18 @@ import { useState, useEffect } from "react";
 import { PrivacyWallet, DerivedAddress } from "@/lib/hdWallet";
 import { NetworkId, NETWORKS } from "@/lib/networks";
 import { getAllTransactions } from "@/lib/storage";
-import { useToast } from "./Toast";
-import {
-  Zap,
-  ArrowUpRight,
-  ArrowDownLeft,
-  ArrowLeftRight,
-  Globe,
-  Copy,
-  ShieldCheck,
-  Lock,
-  ArrowRight,
-} from "lucide-react";
 
 interface OverviewPageProps {
   wallet: PrivacyWallet;
   network: NetworkId;
   onSendClick: () => void;
   onHistoryClick: () => void;
-  onReceiveClick: () => void;
 }
 
-export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onReceiveClick }: OverviewPageProps) {
+export function OverviewPage({ wallet, network, onSendClick, onHistoryClick }: OverviewPageProps) {
   const [addresses, setAddresses] = useState<DerivedAddress[]>([]);
   const [balances, setBalances] = useState<Record<string, string>>({});
   const [transactions, setTransactions] = useState<any[]>([]);
-  const { showToast } = useToast();
 
   useEffect(() => {
     const derived = wallet.getAllDerivedAddresses(3);
@@ -58,11 +44,6 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
     }
   };
 
-  const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
-    showToast("Address copied to clipboard", "success");
-  };
-
   const totalBalance = addresses.reduce((sum, addr) => {
     const balance = parseFloat(balances[addr.address] || "0");
     return sum + balance;
@@ -75,22 +56,17 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
       {/* Get Testnet ETH Alert */}
       <div className="bg-gradient-to-r from-amber-900/20 to-orange-900/20 border border-amber-600/30 rounded-xl p-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-amber-300 mb-1">Get Testnet ETH</p>
-              <p className="text-sm text-amber-200">Use the faucet to fund your addresses for testing</p>
-            </div>
+          <div>
+            <p className="text-sm font-semibold text-amber-300 mb-1">⚡ Get Testnet ETH</p>
+            <p className="text-sm text-amber-200">Use the faucet to fund your addresses for testing</p>
           </div>
           <a
             href={networkConfig.faucetUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition"
           >
-            Get ETH <ArrowRight className="w-4 h-4" />
+            Get ETH →
           </a>
         </div>
       </div>
@@ -111,33 +87,27 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
       <div className="grid grid-cols-4 gap-4">
         <button
           onClick={onSendClick}
-          className="bg-gradient-to-br from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-5 px-6 rounded-xl transition shadow-lg flex flex-col items-center gap-2"
+          className="bg-gradient-to-br from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-4 px-6 rounded-xl transition shadow-lg"
         >
-          <ArrowUpRight className="w-6 h-6" />
-          <span className="text-sm">Send</span>
+          <div className="text-2xl mb-2">📤</div>
+          <div className="text-sm">Send</div>
         </button>
-        <button
-          onClick={onReceiveClick}
-          className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-5 px-6 rounded-xl transition flex flex-col items-center gap-2"
-        >
-          <ArrowDownLeft className="w-6 h-6" />
-          <span className="text-sm">Receive</span>
-        </button>
-        <button
-          onClick={() => showToast("Swap feature coming soon", "info")}
-          className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-5 px-6 rounded-xl transition flex flex-col items-center gap-2"
-        >
-          <ArrowLeftRight className="w-6 h-6" />
-          <span className="text-sm">Swap</span>
-        </button>
+      <button onClick={onReceiveClick} className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-4 px-6 rounded-xl transition">
+  <div className="text-2xl mb-2">📥</div>
+  <div className="text-sm">Receive</div>
+</button>
+<button onClick={() => alert("Swap feature coming soon! 🚀")} className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-4 px-6 rounded-xl transition">
+  <div className="text-2xl mb-2">⚡</div>
+  <div className="text-sm">Swap</div>
+</button>
         <a
           href={networkConfig.faucetUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-5 px-6 rounded-xl transition flex flex-col items-center gap-2"
+          className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-4 px-6 rounded-xl transition text-center"
         >
-          <Globe className="w-6 h-6" />
-          <span className="text-sm">Faucet</span>
+          <div className="text-2xl mb-2">🌐</div>
+          <div className="text-sm">Faucet</div>
         </a>
       </div>
 
@@ -179,13 +149,7 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
                   <p className="text-sm font-bold text-white">Address #{idx}</p>
                   <p className="text-xs font-mono text-slate-500 mt-1">{addr.path}</p>
                 </div>
-                <button
-                  onClick={() => copyAddress(addr.address)}
-                  className="text-slate-400 hover:text-white transition"
-                  title="Copy address"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
+                <button className="text-slate-400 hover:text-white text-lg">📋</button>
               </div>
               <p className="text-sm font-mono text-slate-400 break-all mb-4">{addr.address}</p>
               <div className="flex justify-between items-center">
@@ -202,10 +166,7 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
       {/* Feature Cards */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-teal-900/20 to-cyan-900/20 border border-teal-600/30 rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <ShieldCheck className="w-4 h-4 text-teal-300" />
-            <p className="text-sm font-semibold text-teal-300">Privacy</p>
-          </div>
+          <p className="text-sm font-semibold text-teal-300 mb-3">🔐 Privacy</p>
           <ul className="text-xs text-teal-200 space-y-2">
             <li>✓ Fresh address per transaction</li>
             <li>✓ Hides transfer amounts</li>
@@ -213,10 +174,7 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
           </ul>
         </div>
         <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-600/30 rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Lock className="w-4 h-4 text-green-300" />
-            <p className="text-sm font-semibold text-green-300">Security</p>
-          </div>
+          <p className="text-sm font-semibold text-green-300 mb-3">🛡️ Security</p>
           <ul className="text-xs text-green-200 space-y-2">
             <li>✓ Client-side signing only</li>
             <li>✓ Encrypted key storage</li>
