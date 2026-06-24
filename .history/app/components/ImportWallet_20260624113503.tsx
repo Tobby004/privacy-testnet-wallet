@@ -205,7 +205,7 @@ export function ImportWallet({ onSuccess, selectedNetwork, onNetworkChange }: Im
 
         <div className="min-h-screen flex items-center justify-center px-4">
          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 max-w-6xl w-full">
-            <div className="hidden lg:flex flex-col justify-center">
+            <div className="flex flex-col justify-center">
               <div className="mb-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-500/50 mb-6">
                   <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></span>

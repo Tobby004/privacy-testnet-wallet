@@ -200,7 +200,7 @@ export function OverviewPage({ wallet, network, onSendClick, onHistoryClick, onR
       </div>
 
       {/* Feature Cards */}
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-teal-900/20 to-cyan-900/20 border border-teal-600/30 rounded-xl p-6">
           <div className="flex items-center gap-2 mb-3">
             <ShieldCheck className="w-4 h-4 text-teal-300" />
