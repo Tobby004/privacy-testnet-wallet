@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 7,
+            "activePatchIndex": 9,
             "patches": [
                 {
                     "date": 1782232665224,
@@ -36,6 +36,14 @@
                 {
                     "date": 1782288781948,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -199,9 +199,9 @@\n         </div>\n       </div>\n \n       {/* Feature Cards */}\n-      <div className=\"grid grid-cols-2 gap-4\">\n+       <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n         <div className=\"bg-gradient-to-br from-teal-900/20 to-cyan-900/20 border border-teal-600/30 rounded-xl p-6\">\n           <div className=\"flex items-center gap-2 mb-3\">\n             <ShieldCheck className=\"w-4 h-4 text-teal-300\" />\n             <p className=\"text-sm font-semibold text-teal-300\">Privacy</p>\n"
+                },
+                {
+                    "date": 1782333000656,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -4,8 +4,9 @@\n import { PrivacyWallet, DerivedAddress } from \"@/lib/hdWallet\";\n import { NetworkId, NETWORKS } from \"@/lib/networks\";\n import { getAllTransactions } from \"@/lib/storage\";\n import { useToast } from \"./Toast\";\n+import { PrivacyScore } from \"./PrivacyScore\";\n import {\n   Zap,\n   ArrowUpRight,\n   ArrowDownLeft,\n@@ -160,8 +161,13 @@\n           <p className=\"text-3xl font-bold text-teal-400\">100%</p>\n           <p className=\"text-xs text-slate-500 mt-2\">Fully shielded</p>\n         </div>\n       </div>\n+      <PrivacyScore\n+  addressCount={addresses.length}\n+  transactionCount={transactions.length}\n+  usesFreshAddresses={true}\n+/>\n \n       {/* Recent Addresses */}\n       <div>\n         <div className=\"flex items-center justify-between mb-4\">\n"
+                },
+                {
+                    "date": 1782333064165,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -142,9 +142,9 @@\n         </a>\n       </div>\n \n       {/* Stats Grid */}\n-        <div className=\"grid grid-cols-1 sm:grid-cols-3 gap-4\">\n+        <div className=\"grid-cols-1 sm:grid-cols-2 gap-4\">\n         <div className=\"bg-slate-800/30 border border-slate-700 rounded-xl p-6\">\n           <p className=\"text-sm text-slate-400 mb-2\">Addresses Ready</p>\n           <p className=\"text-3xl font-bold text-white\">\n             {addresses.length}/{addresses.length}\n"
                 }
             ],
             "date": 1782232665224,
