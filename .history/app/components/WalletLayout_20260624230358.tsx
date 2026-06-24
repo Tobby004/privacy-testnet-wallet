@@ -179,9 +179,7 @@ export function WalletLayout({
             <div className="hidden sm:flex items-center gap-2 text-sm text-slate-400">
               <Globe className="w-4 h-4" />
               {network === "sepolia" && "Sepolia Testnet"}
-              {network === "baseSepolia" && "Base Sepolia"}
-              {network === "arbitrumSepolia" && "Arbitrum Sepolia"}
-              {network === "polygonAmoy" && "Polygon Amoy"}
+              {network === "goerli" && "Goerli Testnet"}
             </div>
           </div>
         </div>

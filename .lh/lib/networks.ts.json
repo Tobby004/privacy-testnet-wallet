@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/networks.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782331279828,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782331279828,
+            "name": "Commit-0",
+            "content": "export const NETWORKS = {\n  sepolia: {\n    chainId: 11155111,\n    name: \"Sepolia\",\n    rpcUrls: [\n      \"https://sepolia.drpc.org\",\n      \"https://rpc.sepolia.org\",\n      \"https://ethereum-sepolia-rpc.publicnode.com\",\n    ],\n    explorerUrl: \"https://sepolia.etherscan.io\",\n    faucetUrl: \"https://www.alchemy.com/faucets/ethereum-sepolia\",\n    nativeCurrency: { name: \"ETH\", symbol: \"ETH\", decimals: 18 },\n  },\n  baseSepolia: {\n    chainId: 84532,\n    name: \"Base Sepolia\",\n    rpcUrls: [\n      \"https://sepolia.base.org\",\n      \"https://base-sepolia-rpc.publicnode.com\",\n    ],\n    explorerUrl: \"https://sepolia.basescan.org\",\n    faucetUrl: \"https://www.alchemy.com/faucets/base-sepolia\",\n    nativeCurrency: { name: \"ETH\", symbol: \"ETH\", decimals: 18 },\n  },\n  arbitrumSepolia: {\n    chainId: 421614,\n    name: \"Arbitrum Sepolia\",\n    rpcUrls: [\n      \"https://sepolia-rollup.arbitrum.io/rpc\",\n      \"https://arbitrum-sepolia-rpc.publicnode.com\",\n    ],\n    explorerUrl: \"https://sepolia.arbiscan.io\",\n    faucetUrl: \"https://www.alchemy.com/faucets/arbitrum-sepolia\",\n    nativeCurrency: { name: \"ETH\", symbol: \"ETH\", decimals: 18 },\n  },\n  polygonAmoy: {\n    chainId: 80002,\n    name: \"Polygon Amoy\",\n    rpcUrls: [\n      \"https://rpc-amoy.polygon.technology\",\n      \"https://polygon-amoy-bor-rpc.publicnode.com\",\n    ],\n    explorerUrl: \"https://amoy.polygonscan.com\",\n    faucetUrl: \"https://faucet.polygon.technology\",\n    nativeCurrency: { name: \"POL\", symbol: \"POL\", decimals: 18 },\n  },\n};\n\nexport type NetworkId = keyof typeof NETWORKS;\n\nexport function getNetwork(id: NetworkId) {\n  return NETWORKS[id];\n}"
+        }
+    ]
+}

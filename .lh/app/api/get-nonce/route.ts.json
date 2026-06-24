@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/api/get-nonce/route.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782331918513,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782331918513,
+            "name": "Commit-0",
+            "content": "import { NextRequest, NextResponse } from \"next/server\";\nimport { ethers } from \"ethers\";\nimport { NETWORKS, NetworkId } from \"@/lib/networks\";\n\nlet rpcIndex = 0;\n\nfunction getNextRPC(network: string = \"sepolia\"): string {\n  const config = (network in NETWORKS)\n    ? NETWORKS[network as NetworkId]\n    : NETWORKS.sepolia;\n  const urls = config.rpcUrls;\n  const rpc = urls[rpcIndex % urls.length];\n  rpcIndex++;\n  return rpc;\n}\n\nexport async function POST(request: NextRequest) {\n  try {\n    const { address, network } = await request.json();\n\n    if (!address) {\n      return NextResponse.json({ error: \"Missing address\" }, { status: 400 });\n    }\n\n    const rpcUrl = getNextRPC(network || \"sepolia\");\n\n    try {\n      const provider = new ethers.JsonRpcProvider(rpcUrl);\n      const nonce = await provider.getTransactionCount(address);\n\n      return NextResponse.json({\n        address,\n        nonce,\n        network: network || \"sepolia\",\n      });\n    } catch (rpcError) {\n      console.error(\"RPC error:\", rpcError);\n      return NextResponse.json(\n        { error: \"RPC request failed\", details: String(rpcError) },\n        { status: 500 }\n      );\n    }\n  } catch (error) {\n    console.error(\"[Nonce Error]\", error);\n    return NextResponse.json(\n      { error: \"Failed to fetch nonce\", details: String(error) },\n      { status: 500 }\n    );\n  }\n}"
+        }
+    ]
+}

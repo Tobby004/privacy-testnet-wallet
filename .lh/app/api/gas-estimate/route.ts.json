@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1781591665441,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1782332018942,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,19 +1,24 @@\n import { NextRequest, NextResponse } from \"next/server\";\n+import { NETWORKS, NetworkId } from \"@/lib/networks\";\n import { RPC_ENDPOINTS } from \"@/lib/constants\";\n \n let rpcIndex = 0;\n \n-function getNextRPC(): string {\n-  const rpc = RPC_ENDPOINTS[rpcIndex % RPC_ENDPOINTS.length];\n+function getNextRPC(network?: string): string {\n+  const urls =\n+    network && network in NETWORKS\n+      ? NETWORKS[network as NetworkId].rpcUrls\n+      : RPC_ENDPOINTS;\n+  const rpc = urls[rpcIndex % urls.length];\n   rpcIndex++;\n   return rpc;\n }\n \n export async function POST(request: NextRequest) {\n   try {\n     const body = await request.json();\n-    const rpcUrl = getNextRPC();\n+    const rpcUrl = getNextRPC(body.network);\n \n     const response = await fetch(rpcUrl, {\n       method: \"POST\",\n       headers: { \"Content-Type\": \"application/json\" },\n@@ -33,21 +38,15 @@\n \n     const data = await response.json();\n \n     if (data.error) {\n-      return NextResponse.json(\n-        { error: data.error.message },\n-        { status: 400 }\n-      );\n+      return NextResponse.json({ error: data.error.message }, { status: 400 });\n     }\n \n     return NextResponse.json({\n       gasLimit: data.result,\n     });\n   } catch (error) {\n     console.error(\"[Gas Estimate Error]\", error);\n-    return NextResponse.json(\n-      { error: \"Gas estimation failed\" },\n-      { status: 500 }\n-    );\n+    return NextResponse.json({ error: \"Gas estimation failed\" }, { status: 500 });\n   }\n }\n\\ No newline at end of file\n"
                 }
             ],
             "date": 1781591665441,

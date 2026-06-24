@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1781591637301,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1782331846552,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,15 +1,8 @@\n+// Legacy fallback RPC list (Sepolia). Network-specific RPCs live in networks.ts\n export const RPC_ENDPOINTS = [\n   \"https://sepolia.drpc.org\",\n   \"https://rpc.sepolia.org\",\n   \"https://ethereum-sepolia-rpc.publicnode.com\",\n ];\n \n-export const NETWORKS = {\n-  sepolia: {\n-    chainId: 11155111,\n-    name: \"Sepolia Testnet\",\n-    rpcUrl: RPC_ENDPOINTS[0],\n-  },\n-};\n-\n export const MEV_BLOCKER_RPC = \"https://api.mevblocker.io/tx\";\n\\ No newline at end of file\n"
                 }
             ],
             "date": 1781591637301,
