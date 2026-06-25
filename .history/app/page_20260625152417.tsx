@@ -205,9 +205,6 @@ const handleUnlock = async (e: React.FormEvent) => {
     selectedAddressIndex={selectedAddressIndex}
   />
 )}
-{currentPage === "stealth" && (
-  <StealthPage wallet={wallet} network={network} />
-)}
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}

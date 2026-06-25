@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/stealthKeys.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782389331097,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782389331097,
+            "name": "Commit-0",
+            "content": "/**\n * Persistence for the user's stealth keys (spending + viewing) and meta-address.\n *\n * Educational note: for simplicity these are stored as-is in localStorage. In a\n * production wallet you would (a) derive them deterministically from the HD seed\n * so they're recoverable, and (b) encrypt them at rest with the user's password,\n * exactly like the main seed phrase. Wiring HD derivation is a clean follow-up.\n */\n\nimport { generateStealthKeys, StealthKeys } from \"./stealth\";\n\nconst STORAGE_KEY = \"stealth_keys\";\n\n/** Load existing stealth keys, or generate + persist a fresh set on first use. */\nexport function getOrCreateStealthKeys(): StealthKeys {\n  try {\n    const existing = localStorage.getItem(STORAGE_KEY);\n    if (existing) return JSON.parse(existing);\n  } catch {}\n  const keys = generateStealthKeys();\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(keys));\n  return keys;\n}\n\n/** Returns keys if they exist, else null (without creating). */\nexport function getStealthKeys(): StealthKeys | null {\n  try {\n    const existing = localStorage.getItem(STORAGE_KEY);\n    return existing ? JSON.parse(existing) : null;\n  } catch {\n    return null;\n  }\n}\n\nexport function clearStealthKeys(): void {\n  localStorage.removeItem(STORAGE_KEY);\n}"
+        }
+    ]
+}

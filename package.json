@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@noble/curves": "^2.2.0",
+    "@noble/hashes": "^2.2.0",
     "axios": "^1.18.0",
     "ethers": "^6.16.0",
     "lucide-react": "^1.21.0",

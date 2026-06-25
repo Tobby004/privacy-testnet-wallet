@@ -30,6 +30,7 @@ export function SendPage({
 
   const networkConfig = NETWORKS[network];
 
+  // Get the full derived account (address + private key) for signing
   const account = (() => {
     try {
       return wallet.getDerivedAddress(selectedAddressIndex);
@@ -49,24 +50,14 @@ export function SendPage({
     }
   };
 
-  const updateHistoryStatus = (hash: string, status: string) => {
-    try {
-      const history = JSON.parse(localStorage.getItem("tx_history") || "[]");
-      const updated = history.map((tx: any) =>
-        tx.hash === hash ? { ...tx, status } : tx
-      );
-      localStorage.setItem("tx_history", JSON.stringify(updated));
-    } catch {}
-  };
-
-  // Robust polling: tries EVERY rpc each cycle, checks immediately, and
-  // also uses waitForTransaction as a backup.
-  useEffect(() => {
+  // Poll for confirmation once we have a real hash
+ useEffect(() => {
     if (!txHash || txStatus !== "pending") return;
 
     let cancelled = false;
 
-    const checkOnce = async (): Promise<boolean> => {
+    const checkStatus = async () => {
+      // Try each RPC until one finds the receipt
       for (const rpcUrl of networkConfig.rpcUrls) {
         try {
           const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -75,23 +66,22 @@ export function SendPage({
             const newStatus = receipt.status === 1 ? "confirmed" : "failed";
             setTxStatus(newStatus);
             updateHistoryStatus(txHash, newStatus);
-            if (newStatus === "confirmed") showToast("Transaction confirmed", "success");
             return true;
           }
         } catch {
-          // try next rpc
+          // try next RPC
         }
       }
       return false;
     };
 
-    // check immediately
-    checkOnce();
-
     const interval = setInterval(async () => {
-      const done = await checkOnce();
+      const done = await checkStatus();
       if (done) clearInterval(interval);
     }, 4000);
+
+    // check immediately too
+    checkStatus();
 
     return () => {
       cancelled = true;
@@ -119,15 +109,20 @@ export function SendPage({
       const gasPriceNum = parseFloat(gasPrice);
       if (isNaN(gasPriceNum) || gasPriceNum <= 0) throw new Error("Invalid gas price");
 
+      // Connect to the network
       const provider = new ethers.JsonRpcProvider(networkConfig.rpcUrls[0]);
+
+      // Create a signer from the derived private key
       const signer = new ethers.Wallet(account.privateKey, provider);
 
+      // Build the transaction
       const tx = {
         to: recipient,
         value: ethers.parseEther(amount),
         gasPrice: ethers.parseUnits(gasPrice, "gwei"),
       };
 
+      // Broadcast it for real — this returns a real tx response
       const txResponse = await signer.sendTransaction(tx);
       const realHash = txResponse.hash;
 
@@ -136,6 +131,7 @@ export function SendPage({
       setSuccess(true);
       showToast("Transaction broadcast to network", "success");
 
+      // Save to history with the REAL hash
       const history = JSON.parse(localStorage.getItem("tx_history") || "[]");
       history.unshift({
         hash: realHash,
@@ -149,22 +145,11 @@ export function SendPage({
       });
       localStorage.setItem("tx_history", JSON.stringify(history.slice(0, 50)));
 
-      // Backup: wait for the tx using the same provider we sent from
-      txResponse
-        .wait()
-        .then((receipt) => {
-          if (receipt) {
-            const newStatus = receipt.status === 1 ? "confirmed" : "failed";
-            setTxStatus(newStatus);
-            updateHistoryStatus(realHash, newStatus);
-          }
-        })
-        .catch(() => {});
-
       setRecipient("");
       setAmount("");
       setGasPrice("2");
     } catch (err: any) {
+      // ethers errors can be verbose; surface the useful part
       const msg =
         err?.shortMessage ||
         err?.reason ||
@@ -255,6 +240,7 @@ export function SendPage({
         </p>
 
         <form onSubmit={handleSend} className="space-y-6">
+          {/* From Address */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">From</label>
             <div className="px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-400 text-xs font-mono break-all">
@@ -262,6 +248,7 @@ export function SendPage({
             </div>
           </div>
 
+          {/* Recipient */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">To</label>
             <input
@@ -276,6 +263,7 @@ export function SendPage({
             )}
           </div>
 
+          {/* Amount & Gas */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">Amount (ETH)</label>
@@ -303,6 +291,7 @@ export function SendPage({
             </div>
           </div>
 
+          {/* Privacy */}
           <div className="bg-purple-900/20 border border-purple-600/30 rounded-lg p-4">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-purple-300" />
@@ -313,12 +302,14 @@ export function SendPage({
             </p>
           </div>
 
+          {/* Error */}
           {error && (
             <div className="p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
               <p className="text-sm text-red-300 break-words">{error}</p>
             </div>
           )}
 
+          {/* Buttons */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"

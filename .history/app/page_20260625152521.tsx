@@ -131,6 +131,10 @@ const handleUnlock = async (e: React.FormEvent) => {
               />
             </div>
 
+            {currentPage === "stealth" && (
+              <StealthPage wallet={wallet} network={network} />
+             )}
+
             {unlockError && (
               <div className="p-3 bg-red-900/20 border border-red-600/30 rounded-lg">
                 <p className="text-sm font-semibold text-red-300">❌ {unlockError}</p>
@@ -204,9 +208,6 @@ const handleUnlock = async (e: React.FormEvent) => {
     network={network}
     selectedAddressIndex={selectedAddressIndex}
   />
-)}
-{currentPage === "stealth" && (
-  <StealthPage wallet={wallet} network={network} />
 )}
       {currentPage === "history" && (
         <HistoryPage network={network} />

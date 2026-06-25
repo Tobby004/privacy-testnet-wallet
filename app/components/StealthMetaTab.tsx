@@ -1,0 +1,117 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { getOrCreateStealthKeys } from "@/lib/stealthKeys";
+import { StealthKeys } from "@/lib/stealth";
+import { useToast } from "./Toast";
+import { Copy, Check, Eye, KeyRound, Info } from "lucide-react";
+
+export function StealthMetaTab() {
+  const [keys, setKeys] = useState<StealthKeys | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showKeys, setShowKeys] = useState(false);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    // load or create the user's stealth keys on first view
+    setKeys(getOrCreateStealthKeys());
+  }, []);
+
+  if (!keys) {
+    return <p className="text-slate-400">Loading stealth keys…</p>;
+  }
+
+  const copyMeta = () => {
+    navigator.clipboard.writeText(keys.stealthMetaAddress);
+    setCopied(true);
+    showToast("Meta-address copied", "success");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(keys.stealthMetaAddress)}`;
+
+  return (
+    <div className="space-y-6">
+      {/* Explainer */}
+      <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 flex gap-3">
+        <Info className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-blue-200">
+          Share this meta-address publicly. Anyone can use it to send you funds at a fresh,
+          unlinkable stealth address — but only you can detect and spend what you receive.
+        </p>
+      </div>
+
+      {/* QR */}
+      <div className="flex flex-col items-center">
+        <div className="bg-white p-4 rounded-xl mb-3">
+          <img src={qrUrl} alt="Stealth meta-address QR" className="w-52 h-52" />
+        </div>
+        <p className="text-xs text-slate-500">Your stealth meta-address</p>
+      </div>
+
+      {/* Meta-address + copy */}
+      <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <KeyRound className="w-4 h-4 text-purple-300" />
+          <p className="text-xs text-slate-400">Stealth Meta-Address</p>
+        </div>
+        <p className="text-xs font-mono text-slate-300 break-all mb-4">
+          {keys.stealthMetaAddress}
+        </p>
+        <button
+          onClick={copyMeta}
+          className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition ${
+            copied ? "bg-green-600 text-white" : "bg-purple-600 hover:bg-purple-700 text-white"
+          }`}
+        >
+          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          {copied ? "Copied!" : "Copy Meta-Address"}
+        </button>
+      </div>
+
+      {/* Advanced: reveal underlying keys (educational) */}
+      <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
+        <button
+          onClick={() => setShowKeys(!showKeys)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <div className="flex items-center gap-2">
+            <Eye className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-semibold text-slate-300">
+              Advanced: view underlying keys
+            </span>
+          </div>
+          <span className="text-slate-500">{showKeys ? "▼" : "→"}</span>
+        </button>
+
+        {showKeys && (
+          <div className="mt-4 space-y-3">
+            <div className="bg-amber-900/20 border border-amber-600/30 rounded p-3">
+              <p className="text-xs text-amber-200">
+                The viewing key lets a third party <em>detect</em> your incoming payments
+                but not spend them. The spending key controls the funds — never share it.
+              </p>
+            </div>
+            <KeyRow label="Spending Public Key" value={keys.spendingPublicKey} />
+            <KeyRow label="Viewing Public Key" value={keys.viewingPublicKey} />
+            <KeyRow label="Spending Private Key" value={keys.spendingPrivateKey} secret />
+            <KeyRow label="Viewing Private Key" value={keys.viewingPrivateKey} secret />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function KeyRow({ label, value, secret }: { label: string; value: string; secret?: boolean }) {
+  return (
+    <div>
+      <p className={`text-xs mb-1 ${secret ? "text-red-300" : "text-slate-400"}`}>
+        {label} {secret && "(keep secret)"}
+      </p>
+      <p className="text-xs font-mono text-slate-400 break-all bg-slate-900/50 rounded px-2 py-1">
+        {value}
+      </p>
+    </div>
+  );
+}

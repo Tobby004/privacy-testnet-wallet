@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 24,
+            "activePatchIndex": 29,
             "patches": [
                 {
                     "date": 1781591906691,
@@ -104,6 +104,26 @@
                 {
                     "date": 1782242313884,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -71,9 +71,9 @@\n       const savedNetwork = (localStorage.getItem(\"selected_network\") as NetworkId) || \"sepolia\";\n \n       if (!encrypted) throw new Error(\"No wallet found\");\n \n-      const mnemonic = decryptMnemonic(encrypted, passwordAttempt);\n+      const mnemonic = await decryptMnemonic(encrypted, passwordAttempt);\n       const unlockedWallet = new PrivacyWallet(mnemonic);\n \n       setWallet(unlockedWallet);\n       setNetwork(savedNetwork);\n"
+                },
+                {
+                    "date": 1782390229038,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -11,8 +11,9 @@\n import { SendPage } from \"./components/SendPage\";\n import { ReceivePage } from \"./components/ReceivePage\";\n import { HistoryPage } from \"./components/HistoryPage\";\n import { SettingsPage } from \"./components/SettingsPage\";\n+import { StealthPage } from \"./components/StealthPage\";\n \n type View = \"import\" | \"wallet\";\n type WalletPage =\n   | \"overview\"\n"
+                },
+                {
+                    "date": 1782390257300,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -14,15 +14,9 @@\n import { SettingsPage } from \"./components/SettingsPage\";\n import { StealthPage } from \"./components/StealthPage\";\n \n type View = \"import\" | \"wallet\";\n-type WalletPage =\n-  | \"overview\"\n-  | \"addresses\"\n-  | \"send\"\n-  | \"history\"\n-  |  \"receive\"\n-  | \"settings\";\n+type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"history\" | \"stealth\" | \"settings\";\n \n export default function Home() {\n   const [view, setView] = useState<View>(\"import\");\n   const [wallet, setWallet] = useState<PrivacyWallet | null>(null);\n"
+                },
+                {
+                    "date": 1782390321994,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -130,8 +130,12 @@\n                 autoFocus\n               />\n             </div>\n \n+            {currentPage === \"stealth\" && (\n+              <StealthPage wallet={wallet} network={network} />\n+             )}\n+\n             {unlockError && (\n               <div className=\"p-3 bg-red-900/20 border border-red-600/30 rounded-lg\">\n                 <p className=\"text-sm font-semibold text-red-300\">❌ {unlockError}</p>\n               </div>\n"
+                },
+                {
+                    "date": 1782391609037,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -130,12 +130,8 @@\n                 autoFocus\n               />\n             </div>\n \n-            {currentPage === \"stealth\" && (\n-              <StealthPage wallet={wallet} network={network} />\n-             )}\n-\n             {unlockError && (\n               <div className=\"p-3 bg-red-900/20 border border-red-600/30 rounded-lg\">\n                 <p className=\"text-sm font-semibold text-red-300\">❌ {unlockError}</p>\n               </div>\n"
+                },
+                {
+                    "date": 1782391704593,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -204,8 +204,11 @@\n     network={network}\n     selectedAddressIndex={selectedAddressIndex}\n   />\n )}\n+{currentPage === \"stealth\" && (\n+  <StealthPage wallet={wallet} network={network} />\n+)}\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n \n"
                 }
             ],
             "date": 1781591906691,

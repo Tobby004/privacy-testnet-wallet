@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/stealthAnnouncer.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782389316215,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782389316215,
+            "name": "Commit-0",
+            "content": "/**\n * Local Announcer store (educational stand-in for the on-chain ERC-5564 Announcer).\n *\n * On mainnet/Sepolia, the canonical Announcer at\n * 0x55649E01B5Df198D18D95b5cc5051630cfD45564 emits an `Announcement` event\n * containing (schemeId, stealthAddress, caller, ephemeralPubKey, metadata).\n * The recipient scans those events and runs checkAnnouncement() on each.\n *\n * Here we store the same announcement payload in localStorage so the full\n * scan -> detect -> derive flow works on testnet without gas. The cryptography\n * is identical; only the announcement transport differs.\n *\n * To go fully on-chain later, swap these read/write functions for contract\n * event reads/writes — nothing else in the app needs to change.\n */\n\nexport interface Announcement {\n  schemeId: number;          // 1 = secp256k1\n  stealthAddress: string;    // the one-time address funds were sent to\n  ephemeralPublicKey: string; // sender's ephemeral pubkey (recipient needs this)\n  viewTag: string;           // 1-byte fast-scan tag\n  network: string;           // which testnet\n  timestamp: number;\n  // educational extras (NOT part of the on-chain event):\n  amount?: string;           // what the sender intended to send\n  txHash?: string;           // funding tx, if broadcast\n}\n\nconst STORAGE_KEY = \"stealth_announcements\";\n\n/** Read all announcements (the local equivalent of scanning the event log). */\nexport function getAnnouncements(network?: string): Announcement[] {\n  try {\n    const all: Announcement[] = JSON.parse(\n      localStorage.getItem(STORAGE_KEY) || \"[]\"\n    );\n    return network ? all.filter((a) => a.network === network) : all;\n  } catch {\n    return [];\n  }\n}\n\n/** Publish an announcement (the local equivalent of emitting the event). */\nexport function publishAnnouncement(a: Announcement): void {\n  const all = getAnnouncements();\n  all.unshift(a);\n  // keep the store bounded\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(0, 200)));\n}\n\n/** Clear all local announcements (handy for testing/reset). */\nexport function clearAnnouncements(): void {\n  localStorage.removeItem(STORAGE_KEY);\n}"
+        }
+    ]
+}

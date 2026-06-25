@@ -15,7 +15,13 @@ import { SettingsPage } from "./components/SettingsPage";
 import { StealthPage } from "./components/StealthPage";
 
 type View = "import" | "wallet";
-type WalletPage = "overview" | "addresses" | "send" | "receive" | "history" | "stealth" | "settings";
+type WalletPage =
+  | "overview"
+  | "addresses"
+  | "send"
+  | "history"
+  |  "receive"
+  | "settings";
 
 export default function Home() {
   const [view, setView] = useState<View>("import");
@@ -204,9 +210,6 @@ const handleUnlock = async (e: React.FormEvent) => {
     network={network}
     selectedAddressIndex={selectedAddressIndex}
   />
-)}
-{currentPage === "stealth" && (
-  <StealthPage wallet={wallet} network={network} />
 )}
       {currentPage === "history" && (
         <HistoryPage network={network} />
