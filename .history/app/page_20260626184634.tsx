@@ -17,7 +17,7 @@ import { PrivacyPage } from "./components/PrivacyPage";
 import { TransactionGraph } from "./components/TransactionGraph";
 
 type View = "import" | "wallet";
-type WalletPage = "overview" | "addresses" | "send" | "receive" | "stealth" | "privacy" | "graph" | "history" | "settings";
+type WalletPage = "overview" | "addresses" | "send" | "receive" | "stealth" | "privacy" | "history" | "settings";
 
 export default function Home() {
   const [view, setView] = useState<View>("import");
@@ -216,9 +216,7 @@ const handleUnlock = async (e: React.FormEvent) => {
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}
-  {currentPage === "graph" && (
-  <TransactionGraph wallet={wallet} network={network} />
-)}
+
       {currentPage === "settings" && (
         <SettingsPage network={network} onLock={handleLock} />
       )}

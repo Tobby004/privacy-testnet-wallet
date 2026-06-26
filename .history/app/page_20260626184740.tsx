@@ -216,9 +216,7 @@ const handleUnlock = async (e: React.FormEvent) => {
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}
-  {currentPage === "graph" && (
-  <TransactionGraph wallet={wallet} network={network} />
-)}
+
       {currentPage === "settings" && (
         <SettingsPage network={network} onLock={handleLock} />
       )}

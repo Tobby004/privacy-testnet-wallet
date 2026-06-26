@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 34,
+            "activePatchIndex": 37,
             "patches": [
                 {
                     "date": 1781591906691,
@@ -144,6 +144,18 @@
                 {
                     "date": 1782485397528,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -208,14 +208,14 @@\n )}\n {currentPage === \"stealth\" && (\n   <StealthPage wallet={wallet} network={network} />\n )}\n+          {currentPage === \"privacy\" && (\n+  <PrivacyPage wallet={wallet} network={network} />\n+)}\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n-           {currentPage === \"privacy\" && (\n-  <PrivacyPage wallet={wallet} network={network} />\n-)}\n \n       {currentPage === \"settings\" && (\n         <SettingsPage network={network} onLock={handleLock} />\n       )}\n"
+                },
+                {
+                    "date": 1782488794077,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -13,8 +13,9 @@\n import { HistoryPage } from \"./components/HistoryPage\";\n import { SettingsPage } from \"./components/SettingsPage\";\n import { StealthPage } from \"./components/StealthPage\";\n import { PrivacyPage } from \"./components/PrivacyPage\";\n+import { TransactionGraph } from \"./components/TransactionGraph\";\n \n type View = \"import\" | \"wallet\";\n type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"stealth\" | \"privacy\" | \"history\" | \"settings\";\n \n"
+                },
+                {
+                    "date": 1782488860771,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,9 +16,9 @@\n import { PrivacyPage } from \"./components/PrivacyPage\";\n import { TransactionGraph } from \"./components/TransactionGraph\";\n \n type View = \"import\" | \"wallet\";\n-type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"stealth\" | \"privacy\" | \"history\" | \"settings\";\n+type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"stealth\" | \"privacy\" | \"graph\" | \"history\" | \"settings\";\n \n export default function Home() {\n   const [view, setView] = useState<View>(\"import\");\n   const [wallet, setWallet] = useState<PrivacyWallet | null>(null);\n"
+                },
+                {
+                    "date": 1782488887099,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -215,9 +215,11 @@\n )}\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n-\n+  {currentPage === \"graph\" && (\n+  <TransactionGraph wallet={wallet} network={network} />\n+)}\n       {currentPage === \"settings\" && (\n         <SettingsPage network={network} onLock={handleLock} />\n       )}\n     </WalletLayout>\n"
                 }
             ],
             "date": 1781591906691,

@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 10,
+            "activePatchIndex": 12,
             "patches": [
                 {
                     "date": 1782230632470,
@@ -48,6 +48,14 @@
                 {
                     "date": 1782485427401,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -53,8 +53,9 @@\n   receive: \"Receive\",\n   history: \"Transaction History\",\n   settings: \"Settings\",\n   stealth: \"Stealth Payments\",\n+  privacy: \"Privacy Inspector\",\n };\n \n export function WalletLayout({\n   wallet,\n"
+                },
+                {
+                    "date": 1782488940122,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,8 +16,9 @@\n   Menu,\n   X,\n   Radar,\n   ShieldCheck,\n+  Network,\n } from \"lucide-react\";\n \n interface LayoutProps {\n   wallet: PrivacyWallet;\n@@ -37,8 +38,9 @@\n   { id: \"stealth\", label: \"Stealth\", Icon: Radar },\n   { id: \"privacy\", label: \"Privacy\", Icon: ShieldCheck },\n   { id: \"history\", label: \"History\", Icon: ScrollText },\n   { id: \"settings\", label: \"Settings\", Icon: SettingsIcon },\n+  { id: \"graph\", label: \"Graph\", Icon: Network },\n ];\n \n const networks = [\n   { id: \"sepolia\", name: \"Sepolia\", color: \"from-orange-500 to-yellow-500\" },\n"
+                },
+                {
+                    "date": 1782488953954,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -56,8 +56,9 @@\n   history: \"Transaction History\",\n   settings: \"Settings\",\n   stealth: \"Stealth Payments\",\n   privacy: \"Privacy Inspector\",\n+  graph: \"Transaction Graph\",\n };\n \n export function WalletLayout({\n   wallet,\n"
                 }
             ],
             "date": 1782230632470,

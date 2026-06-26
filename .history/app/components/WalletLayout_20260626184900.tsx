@@ -57,7 +57,6 @@ const pageTitles: Record<string, string> = {
   settings: "Settings",
   stealth: "Stealth Payments",
   privacy: "Privacy Inspector",
-  graph: "Transaction Graph",
 };
 
 export function WalletLayout({
