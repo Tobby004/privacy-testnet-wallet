@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 2,
+            "activePatchIndex": 3,
             "patches": [
                 {
                     "date": 1782390107177,
@@ -16,6 +16,10 @@
                 {
                     "date": 1782393259781,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -4,8 +4,9 @@\n import { PrivacyWallet } from \"@/lib/hdWallet\";\n import { NetworkId } from \"@/lib/networks\";\n import { StealthMetaTab } from \"./StealthMetaTab\";\n import { StealthSendTab } from \"./StealthSendTab\";\n+import { StealthScanTab } from \"./StealthScanTab\";\n import { KeyRound, Send, Radar } from \"lucide-react\";\n \n interface StealthPageProps {\n   wallet: PrivacyWallet;\n@@ -51,13 +52,9 @@\n \n       <div className=\"bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6\">\n         {tab === \"meta\" && <StealthMetaTab />}\n         {tab === \"send\" && <StealthSendTab wallet={wallet} network={network} />}\n-        {tab === \"scan\" && (\n-          <p className=\"text-slate-400 text-sm text-center py-8\">\n-            Scan tab — coming next.\n-          </p>\n-        )}\n+        {tab === \"scan\" && <StealthScanTab network={network} />}\n       </div>\n     </div>\n   );\n }\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1782477941332,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -50,9 +50,9 @@\n         ))}\n       </div>\n \n       <div className=\"bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6\">\n-        {tab === \"meta\" && <StealthMetaTab />}\n+        {tab === \"meta\" && <StealthMetaTab wallet={wallet} />}\n         {tab === \"send\" && <StealthSendTab wallet={wallet} network={network} />}\n         {tab === \"scan\" && <StealthScanTab network={network} />}\n       </div>\n     </div>\n"
                 }
             ],
             "date": 1782390107177,

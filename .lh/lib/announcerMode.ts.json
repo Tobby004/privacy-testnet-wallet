@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/announcerMode.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782483054992,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782483054992,
+            "name": "Commit-0",
+            "content": "/**\n * Announcer mode: local (educational, free) vs on-chain (real ERC-5564).\n * Persisted so the choice survives refresh.\n */\n\nexport type AnnouncerMode = \"local\" | \"onchain\";\n\nconst STORAGE_KEY = \"announcer_mode\";\n\nexport function getAnnouncerMode(): AnnouncerMode {\n  try {\n    const v = localStorage.getItem(STORAGE_KEY);\n    return v === \"onchain\" ? \"onchain\" : \"local\";\n  } catch {\n    return \"local\";\n  }\n}\n\nexport function setAnnouncerMode(mode: AnnouncerMode): void {\n  localStorage.setItem(STORAGE_KEY, mode);\n}"
+        }
+    ]
+}
