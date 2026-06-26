@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 7,
+            "activePatchIndex": 10,
             "patches": [
                 {
                     "date": 1782230632470,
@@ -36,6 +36,18 @@
                 {
                     "date": 1782391327408,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -32,8 +32,9 @@\n   { id: \"overview\", label: \"Overview\", Icon: LayoutDashboard },\n   { id: \"addresses\", label: \"Addresses\", Icon: MapPin },\n   { id: \"send\", label: \"Send\", Icon: ArrowUpRight },\n   { id: \"receive\", label: \"Receive\", Icon: ArrowDownLeft },\n+  { id: \"stealth\", label: \"Stealth\", Icon: Radar },\n   { id: \"history\", label: \"History\", Icon: ScrollText },\n   { id: \"settings\", label: \"Settings\", Icon: SettingsIcon },\n ];\n \n"
+                },
+                {
+                    "date": 1782485331216,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,8 +15,9 @@\n   Globe,\n   Menu,\n   X,\n   Radar,\n+  ShieldCheck,\n } from \"lucide-react\";\n \n interface LayoutProps {\n   wallet: PrivacyWallet;\n"
+                },
+                {
+                    "date": 1782485374595,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -34,8 +34,9 @@\n   { id: \"addresses\", label: \"Addresses\", Icon: MapPin },\n   { id: \"send\", label: \"Send\", Icon: ArrowUpRight },\n   { id: \"receive\", label: \"Receive\", Icon: ArrowDownLeft },\n   { id: \"stealth\", label: \"Stealth\", Icon: Radar },\n+  { id: \"privacy\", label: \"Privacy\", Icon: ShieldCheck },\n   { id: \"history\", label: \"History\", Icon: ScrollText },\n   { id: \"settings\", label: \"Settings\", Icon: SettingsIcon },\n ];\n \n"
+                },
+                {
+                    "date": 1782485427401,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -53,8 +53,9 @@\n   receive: \"Receive\",\n   history: \"Transaction History\",\n   settings: \"Settings\",\n   stealth: \"Stealth Payments\",\n+  privacy: \"Privacy Inspector\",\n };\n \n export function WalletLayout({\n   wallet,\n"
                 }
             ],
             "date": 1782230632470,

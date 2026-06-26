@@ -209,12 +209,12 @@ const handleUnlock = async (e: React.FormEvent) => {
 {currentPage === "stealth" && (
   <StealthPage wallet={wallet} network={network} />
 )}
-          {currentPage === "privacy" && (
-  <PrivacyPage wallet={wallet} network={network} />
-)}
       {currentPage === "history" && (
         <HistoryPage network={network} />
       )}
+           {currentPage === "privacy" && (
+  <PrivacyPage wallet={wallet} network={network} />
+)}
 
       {currentPage === "settings" && (
         <SettingsPage network={network} onLock={handleLock} />

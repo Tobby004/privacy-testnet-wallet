@@ -35,7 +35,6 @@ const navItems = [
   { id: "send", label: "Send", Icon: ArrowUpRight },
   { id: "receive", label: "Receive", Icon: ArrowDownLeft },
   { id: "stealth", label: "Stealth", Icon: Radar },
-  { id: "privacy", label: "Privacy", Icon: ShieldCheck },
   { id: "history", label: "History", Icon: ScrollText },
   { id: "settings", label: "Settings", Icon: SettingsIcon },
 ];
@@ -54,7 +53,6 @@ const pageTitles: Record<string, string> = {
   history: "Transaction History",
   settings: "Settings",
   stealth: "Stealth Payments",
-  privacy: "Privacy Inspector",
 };
 
 export function WalletLayout({

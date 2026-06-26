@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 29,
+            "activePatchIndex": 34,
             "patches": [
                 {
                     "date": 1781591906691,
@@ -124,6 +124,26 @@
                 {
                     "date": 1782391704593,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -204,8 +204,11 @@\n     network={network}\n     selectedAddressIndex={selectedAddressIndex}\n   />\n )}\n+{currentPage === \"stealth\" && (\n+  <StealthPage wallet={wallet} network={network} />\n+)}\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n \n"
+                },
+                {
+                    "date": 1782485129214,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -12,8 +12,9 @@\n import { ReceivePage } from \"./components/ReceivePage\";\n import { HistoryPage } from \"./components/HistoryPage\";\n import { SettingsPage } from \"./components/SettingsPage\";\n import { StealthPage } from \"./components/StealthPage\";\n+import { PrivacyPage } from \"./components/PrivacyPage\";\n \n type View = \"import\" | \"wallet\";\n type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"history\" | \"stealth\" | \"settings\";\n \n"
+                },
+                {
+                    "date": 1782485182415,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -215,7 +215,10 @@\n \n       {currentPage === \"settings\" && (\n         <SettingsPage network={network} onLock={handleLock} />\n       )}\n+      {currentPage === \"privacy\" && (\n+  <PrivacyPage wallet={wallet} network={network} />\n+)}\n     </WalletLayout>\n   );\n }\n"
+                },
+                {
+                    "date": 1782485220709,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,9 +15,9 @@\n import { StealthPage } from \"./components/StealthPage\";\n import { PrivacyPage } from \"./components/PrivacyPage\";\n \n type View = \"import\" | \"wallet\";\n-type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"history\" | \"stealth\" | \"settings\";\n+type WalletPage = \"overview\" | \"addresses\" | \"send\" | \"receive\" | \"stealth\" | \"privacy\" | \"history\" | \"settings\";\n \n export default function Home() {\n   const [view, setView] = useState<View>(\"import\");\n   const [wallet, setWallet] = useState<PrivacyWallet | null>(null);\n"
+                },
+                {
+                    "date": 1782485261374,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -211,14 +211,14 @@\n )}\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n+           {currentPage === \"privacy\" && (\n+  <PrivacyPage wallet={wallet} network={network} />\n+)}\n \n       {currentPage === \"settings\" && (\n         <SettingsPage network={network} onLock={handleLock} />\n       )}\n-      {currentPage === \"privacy\" && (\n-  <PrivacyPage wallet={wallet} network={network} />\n-)}\n     </WalletLayout>\n   );\n }\n"
+                },
+                {
+                    "date": 1782485397528,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -208,14 +208,14 @@\n )}\n {currentPage === \"stealth\" && (\n   <StealthPage wallet={wallet} network={network} />\n )}\n+          {currentPage === \"privacy\" && (\n+  <PrivacyPage wallet={wallet} network={network} />\n+)}\n       {currentPage === \"history\" && (\n         <HistoryPage network={network} />\n       )}\n-           {currentPage === \"privacy\" && (\n-  <PrivacyPage wallet={wallet} network={network} />\n-)}\n \n       {currentPage === \"settings\" && (\n         <SettingsPage network={network} onLock={handleLock} />\n       )}\n"
                 }
             ],
             "date": 1781591906691,
