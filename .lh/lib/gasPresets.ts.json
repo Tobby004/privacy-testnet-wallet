@@ -1,0 +1,18 @@
+{
+    "sourceFile": "lib/gasPresets.ts",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1782489393792,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1782489393792,
+            "name": "Commit-0",
+            "content": "/**\n * Gas presets — Slow / Normal / Fast.\n *\n * Fetches the network's current gas price and applies a multiplier, with a\n * minimum floor so a transaction never broadcasts too low to confirm (the\n * cause of \"stuck pending\" on testnets where reported gas can be near-zero).\n */\n\nimport { ethers } from \"ethers\";\n\nexport type GasSpeed = \"slow\" | \"normal\" | \"fast\";\n\nexport interface GasOption {\n  speed: GasSpeed;\n  label: string;\n  gwei: string;       // human-readable gas price\n  description: string;\n}\n\n// Multipliers over the network's current gas price.\nconst MULTIPLIERS: Record<GasSpeed, number> = {\n  slow: 1.0,\n  normal: 1.5,\n  fast: 2.0,\n};\n\n// Absolute floor (gwei) so testnet txs always confirm.\nconst MIN_GWEI: Record<GasSpeed, number> = {\n  slow: 3,\n  normal: 5,\n  fast: 10,\n};\n\n/**\n * Fetch the three preset gas prices for a network, given an RPC URL.\n * Returns gwei strings ready to display and use.\n */\nexport async function fetchGasPresets(rpcUrl: string): Promise<GasOption[]> {\n  let baseGwei = 5; // fallback if the RPC doesn't report\n  try {\n    const provider = new ethers.JsonRpcProvider(rpcUrl, undefined, { batchMaxCount: 1 });\n    const feeData = await provider.getFeeData();\n    if (feeData.gasPrice) {\n      baseGwei = Number(ethers.formatUnits(feeData.gasPrice, \"gwei\"));\n    }\n  } catch {\n    // keep fallback\n  }\n\n  const make = (speed: GasSpeed, label: string, description: string): GasOption => {\n    const computed = baseGwei * MULTIPLIERS[speed];\n    const gwei = Math.max(computed, MIN_GWEI[speed]);\n    // round to 2 decimals, strip trailing zeros\n    const gweiStr = parseFloat(gwei.toFixed(2)).toString();\n    return { speed, label, gwei: gweiStr, description };\n  };\n\n  return [\n    make(\"slow\", \"Slow\", \"Cheapest; may take longer\"),\n    make(\"normal\", \"Normal\", \"Balanced speed and cost\"),\n    make(\"fast\", \"Fast\", \"Confirms quickly\"),\n  ];\n}"
+        }
+    ]
+}
