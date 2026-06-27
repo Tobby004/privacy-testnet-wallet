@@ -13,7 +13,6 @@ interface SettingsPageProps {
 export function SettingsPage({ network, onLock }: SettingsPageProps) {
   const [showExport, setShowExport] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showBackup, setShowBackup] = useState(false);
   const [seedVisible, setSeedVisible] = useState(false);
   const [seed, setSeed] = useState("");
   const [exportPass, setExportPass] = useState("");
@@ -28,13 +27,17 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
 
   const networkConfig = NETWORKS[network];
 
+  // Export Seed - ASYNC function
   const exportSeed = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Export clicked");
     setExportError("");
     setLoading(true);
+
     try {
       const enc = localStorage.getItem("encrypted_wallet");
       if (!enc) throw new Error("No wallet");
+
       const decrypted = await decryptMnemonic(enc, exportPass);
       setSeed(decrypted);
       setSeedVisible(true);
@@ -46,20 +49,26 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
     }
   };
 
+  // Change Password - ASYNC function
   const changePass = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Password change clicked");
     setPassError("");
     setPassSuccess("");
     setLoading(true);
+
     try {
       if (!currPass || !newPass || !newPassConf) throw new Error("All fields required");
       if (newPass !== newPassConf) throw new Error("Passwords don't match");
       if (newPass.length < 6) throw new Error("Min 6 chars");
+
       const enc = localStorage.getItem("encrypted_wallet");
       if (!enc) throw new Error("No wallet");
+
       const mn = await decryptMnemonic(enc, currPass);
       const newEnc = await encryptMnemonic(mn, newPass);
       localStorage.setItem("encrypted_wallet", newEnc);
+
       setPassSuccess("✓ Password changed!");
       setCurrPass("");
       setNewPass("");
@@ -78,7 +87,10 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
         <button
           type="button"
-          onClick={() => setShowExport(!showExport)}
+          onClick={() => {
+            console.log("Toggle export:", !showExport);
+            setShowExport(!showExport);
+          }}
           className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded mb-4 font-semibold text-white"
         >
           <span>👁️ Export Seed Phrase</span>
@@ -128,7 +140,10 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
         <button
           type="button"
-          onClick={() => setShowPassword(!showPassword)}
+          onClick={() => {
+            console.log("Toggle password:", !showPassword);
+            setShowPassword(!showPassword);
+          }}
           className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded mb-4 font-semibold text-white"
         >
           <span>🔑 Change Password</span>
@@ -168,24 +183,6 @@ export function SettingsPage({ network, onLock }: SettingsPageProps) {
             {passError && <p className="text-red-400 text-sm">{passError}</p>}
             {passSuccess && <p className="text-green-400 text-sm">{passSuccess}</p>}
           </form>
-        )}
-      </div>
-
-      {/* BACKUP SECTION */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <button
-          type="button"
-          onClick={() => setShowBackup(!showBackup)}
-          className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded mb-4 font-semibold text-white"
-        >
-          <span>💾 Backup & Restore</span>
-          <span>{showBackup ? "▼" : "→"}</span>
-        </button>
-
-        {showBackup && (
-          <div className="p-4 bg-slate-700/50 rounded">
-            <BackupPanel />
-          </div>
         )}
       </div>
 
